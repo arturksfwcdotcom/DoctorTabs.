@@ -1,731 +1,1037 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Три в ряд — пилюльки</title>
+  <title>Match 3 Pills</title>
   <style>
     :root{
-      --bg1:#10131a;
-      --bg2:#171b24;
-      --panel:#202635;
-      --panel2:#2a3244;
-      --text:#eef3ff;
-      --muted:#aab4cc;
-      --accent:#7fd4ff;
-      --danger:#ff6b6b;
+      --bg0:#0a0d14;
+      --bg1:#101725;
+      --bg2:#182235;
+      --panel:rgba(255,255,255,.07);
+      --panel2:rgba(255,255,255,.11);
+      --line:rgba(255,255,255,.09);
+      --text:#f4f7ff;
+      --muted:#aeb7cc;
+      --cyan:#7fdcff;
       --good:#70e090;
+      --warn:#ffcf5a;
+      --danger:#ff6868;
+      --shadow:0 18px 48px rgba(0,0,0,.36);
     }
-    html,body{height:100%;margin:0;background:radial-gradient(circle at top, #1d2330, #090b10 75%);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--text);overflow:hidden;touch-action:none;}
-    *{box-sizing:border-box;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;}
-    #wrap{display:grid;grid-template-columns:1fr 260px;grid-template-rows:auto 1fr;gap:12px;height:100%;padding:12px;}
-    header{grid-column:1 / -1;display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:10px 12px;backdrop-filter: blur(10px);}
-    .pillBtn, button{border:none;border-radius:16px;padding:10px 14px;background:linear-gradient(180deg, #2f3850, #232a3c);color:var(--text);font-weight:700;box-shadow:0 6px 18px rgba(0,0,0,.22);}
-    .pillBtn:active, button:active{transform:translateY(1px) scale(.99)}
-    .stat{padding:8px 12px;border-radius:14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);font-weight:700}
-    .stat small{display:block;color:var(--muted);font-size:11px;font-weight:600}
-    #boardArea{display:grid;place-items:center;min-width:0;}
-    #boardShell{position:relative;width:min(92vw, 74vh);max-width:100%;aspect-ratio:1;border-radius:28px;background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));border:1px solid rgba(255,255,255,.09);box-shadow:0 20px 60px rgba(0,0,0,.35);padding:12px;}
-    #board{position:relative;width:100%;height:100%;border-radius:20px;background:linear-gradient(180deg, #171b25, #10131a);overflow:hidden;touch-action:none;}
-    .cellLine{position:absolute;inset:0;pointer-events:none;opacity:.65;background-image:linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px);background-size:calc(100% / var(--cols)) calc(100% / var(--rows));}
-    .cell{position:absolute;border-radius:18px;transform:translate(-50%,-50%);display:flex;align-items:center;justify-content:center;will-change:transform, left, top;}
+
+    html,body{
+      margin:0;height:100%;overflow:hidden;
+      background:
+        radial-gradient(circle at top, rgba(53, 85, 140, .32), transparent 32%),
+        radial-gradient(circle at bottom, rgba(121, 65, 168, .18), transparent 28%),
+        linear-gradient(180deg, var(--bg1), var(--bg0) 78%);
+      color:var(--text);
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      touch-action:none;
+    }
+
+    *{box-sizing:border-box;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}
+
+    #app{
+      height:100%;
+      display:grid;
+      grid-template-columns:minmax(0,1fr) minmax(210px,260px);
+      grid-template-rows:auto minmax(0,1fr);
+      gap:12px;
+      padding:12px;
+    }
+
+    .topbar{
+      grid-column:1 / -1;
+      display:flex;
+      align-items:center;
+      flex-wrap:wrap;
+      gap:10px;
+      padding:10px;
+      border-radius:22px;
+      background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.035));
+      border:1px solid var(--line);
+      box-shadow:var(--shadow);
+      backdrop-filter:blur(12px);
+    }
+
+    .icon-btn,.mode-btn{
+      border:none;
+      border-radius:18px;
+      padding:10px 12px;
+      min-width:44px;
+      min-height:44px;
+      background:linear-gradient(180deg, rgba(255,255,255,.11), rgba(255,255,255,.05));
+      color:var(--text);
+      box-shadow:0 8px 18px rgba(0,0,0,.22);
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      font-weight:800;
+      font-size:15px;
+    }
+
+    .mode-btn.active{
+      background:linear-gradient(180deg, rgba(20, 120, 150, .78), rgba(15, 60, 85, .92));
+      box-shadow:0 0 0 1px rgba(128, 240, 255, .18), 0 12px 28px rgba(0,0,0,.28);
+    }
+
+    .stat{
+      min-width:88px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+      padding:9px 12px;
+      border-radius:16px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.08);
+      font-weight:800;
+    }
+
+    .stat .ico{font-size:18px; width:20px; text-align:center}
+    .stat .num{min-width:24px}
+
+    #board-wrap{
+      min-width:0;
+      display:grid;
+      place-items:center;
+    }
+
+    #board-shell{
+      position:relative;
+      width:min(92vw, 76vh);
+      aspect-ratio:1;
+      border-radius:28px;
+      background:
+        radial-gradient(circle at 30% 20%, rgba(255,255,255,.07), transparent 30%),
+        linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+      border:1px solid var(--line);
+      box-shadow:var(--shadow);
+      padding:12px;
+      overflow:hidden;
+    }
+
+    #board{
+      position:relative;
+      width:100%;
+      height:100%;
+      border-radius:20px;
+      background:
+        radial-gradient(circle at top, rgba(255,255,255,.06), transparent 35%),
+        linear-gradient(180deg, #161c2a, #0f131c);
+      overflow:hidden;
+      touch-action:none;
+    }
+
+    .grid-lines{
+      position:absolute; inset:0; pointer-events:none; opacity:.42;
+      background-image:
+        linear-gradient(rgba(255,255,255,.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.06) 1px, transparent 1px);
+      background-size:calc(100% / var(--cols)) calc(100% / var(--rows));
+    }
+
+    .cell{
+      position:absolute;
+      transform:translate(-50%,-50%);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      will-change:transform,left,top;
+    }
+
     .capsule{
-      width:88%;height:66%;border-radius:999px;background:linear-gradient(180deg, rgba(255,255,255,.25), rgba(255,255,255,.06));
-      position:relative;overflow:hidden;box-shadow:inset 0 4px 10px rgba(255,255,255,.12), inset 0 -8px 12px rgba(0,0,0,.22), 0 7px 12px rgba(0,0,0,.28);
-      border:1px solid rgba(255,255,255,.12);
+      width:86%;
+      height:62%;
+      border-radius:999px;
+      position:relative;
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.16);
+      box-shadow:
+        inset 0 5px 10px rgba(255,255,255,.13),
+        inset 0 -10px 16px rgba(0,0,0,.22),
+        0 8px 14px rgba(0,0,0,.28);
+      transform:translateZ(0);
     }
+
     .capsule::before{
-      content:'';position:absolute;left:12%;top:18%;width:32%;height:25%;border-radius:999px;background:rgba(255,255,255,.45);filter:blur(1px);opacity:.6;
+      content:'';
+      position:absolute;
+      left:12%; top:16%;
+      width:28%; height:24%;
+      border-radius:999px;
+      background:rgba(255,255,255,.42);
+      filter:blur(1px);
+      opacity:.72;
     }
+
     .capsule::after{
-      content:'';position:absolute;inset:0;border-radius:999px;background:linear-gradient(90deg, rgba(255,255,255,.15), transparent 35%, transparent 65%, rgba(255,255,255,.08));mix-blend-mode:screen;opacity:.8;
+      content:'';
+      position:absolute; inset:0;
+      border-radius:999px;
+      background:linear-gradient(90deg, rgba(255,255,255,.18), transparent 28%, transparent 72%, rgba(255,255,255,.12));
+      opacity:.92;
+      mix-blend-mode:screen;
+      pointer-events:none;
     }
-    .selected{filter:drop-shadow(0 0 12px rgba(127,212,255,.8));}
-    .hintSwap{outline:2px dashed rgba(255,255,255,.4);outline-offset:-5px;background:rgba(255,255,255,.08);}
-    .glow{box-shadow:0 0 0 2px rgba(255,255,255,.08), 0 0 22px rgba(127,212,255,.35);}
-    #sidebar{min-width:240px;display:flex;flex-direction:column;gap:12px}
-    .panel{background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));border:1px solid rgba(255,255,255,.08);border-radius:22px;padding:14px;box-shadow:0 16px 36px rgba(0,0,0,.18)}
-    .panel h3{margin:0 0 10px;font-size:16px}
-    .shopItem{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px;border-radius:16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.06);margin-top:10px}
-    .shopItem b{display:block}
-    .shopItem span{display:block;color:var(--muted);font-size:12px}
-    .small{font-size:12px;color:var(--muted);line-height:1.45}
-    .toolbar{display:flex;flex-wrap:wrap;gap:8px}
-    .activeMode{background:linear-gradient(180deg, #164a63, #123041) !important}
-    #toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:rgba(16,20,30,.92);border:1px solid rgba(255,255,255,.1);padding:10px 14px;border-radius:14px;box-shadow:0 12px 30px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:opacity .2s, transform .2s;max-width:min(92vw,600px);text-align:center}
-    #toast.show{opacity:1;transform:translateX(-50%) translateY(-4px)}
-    canvas#fx{position:absolute;inset:0;pointer-events:none}
-    .bounce{animation:bounce .16s ease}
-    @keyframes bounce{from{transform:translate(-50%,-50%) scale(.92)}to{transform:translate(-50%,-50%) scale(1)}}
-    @media (max-width: 900px){
-      #wrap{grid-template-columns:1fr;grid-template-rows:auto auto 1fr;}
-      #sidebar{min-width:0;flex-direction:row;overflow:auto}
-      .panel{min-width:220px;flex:0 0 auto}
-      #boardShell{width:min(96vw, 82vh)}
+
+    .capsule.normal{animation:gentle-breathe 1.9s ease-in-out infinite alternate;}
+    .capsule.rainbow{
+      animation:rainbow-shift 1.15s linear infinite, gentle-breathe 1.7s ease-in-out infinite alternate;
+      background:linear-gradient(90deg, #ff4d4d, #ffb347, #fff06b, #62ff7a, #58d8ff, #8b62ff, #ff62d9);
+      background-size:280% 100%;
+    }
+    .capsule.black{background:linear-gradient(180deg, #313131, #040404);}
+    .capsule.fizz{
+      background:linear-gradient(180deg, #ebffff, #7ff9ff);
+      animation:fizz-pulse .9s ease-in-out infinite alternate;
+      box-shadow:
+        inset 0 5px 10px rgba(255,255,255,.22),
+        inset 0 -10px 16px rgba(0,0,0,.18),
+        0 0 16px rgba(123,245,255,.42),
+        0 8px 14px rgba(0,0,0,.28);
+    }
+
+    .badge-active{
+      position:absolute;
+      inset:18% 28%;
+      border-radius:999px;
+      background:rgba(255,255,255,.14);
+      box-shadow:0 0 10px rgba(255,255,255,.12) inset;
+      pointer-events:none;
+    }
+
+    .selected .capsule{filter:drop-shadow(0 0 14px rgba(125, 220, 255, .78));}
+    .target .capsule{
+      outline:2px dashed rgba(255,255,255,.55);
+      outline-offset:-5px;
+      background-clip:padding-box;
+    }
+
+    #side{
+      min-width:0;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+
+    .panel{
+      border-radius:22px;
+      background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
+      border:1px solid var(--line);
+      box-shadow:var(--shadow);
+      padding:12px;
+    }
+
+    .shop-grid{
+      display:grid;
+      grid-template-columns:repeat(2, minmax(0,1fr));
+      gap:10px;
+    }
+
+    .shop-btn{
+      border:none;
+      border-radius:18px;
+      min-height:74px;
+      padding:10px 8px;
+      background:linear-gradient(180deg, rgba(255,255,255,.11), rgba(255,255,255,.05));
+      color:var(--text);
+      box-shadow:0 8px 18px rgba(0,0,0,.20);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:6px;
+      font-weight:900;
+    }
+
+    .shop-btn .ico{font-size:24px;line-height:1}
+    .shop-btn .price{font-size:13px;color:#dfe7ff;opacity:.92}
+    .shop-btn.glove .ico{filter:drop-shadow(0 0 8px rgba(90,170,255,.34));}
+    .shop-btn.bomb .ico{filter:drop-shadow(0 0 8px rgba(255,140,80,.32));}
+    .shop-btn.shuffle .ico{filter:drop-shadow(0 0 8px rgba(255,255,255,.22));}
+
+    .mini-title{display:none}
+    .panel.shop{padding:12px}
+    .panel.shop .shop-grid{margin-top:0}
+
+    .active-tool{
+      box-shadow:0 0 0 1px rgba(120,220,255,.25), 0 0 20px rgba(120,220,255,.18), 0 8px 18px rgba(0,0,0,.22) !important;
+    }
+
+    canvas#fx{
+      position:absolute; inset:0;
+      pointer-events:none;
+    }
+
+    #toast{
+      position:fixed;
+      left:50%; bottom:16px;
+      transform:translateX(-50%) translateY(8px);
+      padding:10px 14px;
+      border-radius:14px;
+      background:rgba(12, 16, 24, .92);
+      border:1px solid rgba(255,255,255,.09);
+      box-shadow:0 14px 30px rgba(0,0,0,.28);
+      opacity:0;
+      transition:opacity .2s, transform .2s;
+      pointer-events:none;
+      font-weight:800;
+      max-width:min(92vw, 520px);
+      text-align:center;
+    }
+    #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+    @keyframes gentle-breathe{
+      from{transform:scale(1)}
+      to{transform:scale(1.03)}
+    }
+    @keyframes rainbow-shift{
+      from{background-position:0% 50%}
+      to{background-position:100% 50%}
+    }
+    @keyframes fizz-pulse{
+      from{transform:scale(.98)}
+      to{transform:scale(1.03)}
+    }
+
+    @media (max-width: 920px){
+      #app{
+        grid-template-columns:1fr;
+        grid-template-rows:auto auto minmax(0,1fr);
+      }
+      #side{flex-direction:row;overflow:auto;padding-bottom:2px}
+      #side .panel{min-width:220px;flex:0 0 auto}
+      #board-shell{width:min(96vw, 82vh)}
+      .shop-grid{grid-template-columns:repeat(2, minmax(0,1fr))}
+      .stat{min-width:unset; padding:8px 10px}
+    }
+
+    @media (max-width: 520px){
+      .topbar{gap:8px}
+      .icon-btn,.mode-btn{padding:10px 10px;border-radius:16px}
+      .stat{padding:8px 10px;border-radius:14px}
+      #board-shell{width:min(96vw, 80vh);padding:10px;border-radius:24px}
+      .shop-btn{min-height:68px;padding:8px 6px}
     }
   </style>
 </head>
 <body>
-<div id="wrap">
-  <header>
-    <button id="modeBtn" class="pillBtn">Режим: время</button>
-    <div class="stat"><small>Очки</small><span id="score">0</span></div>
-    <div class="stat"><small>Монеты</small><span id="coins">0</span></div>
-    <div class="stat"><small>Ходы</small><span id="moves">0</span></div>
-    <div class="stat"><small>Перемешивания</small><span id="shuffles">0</span></div>
-    <div class="stat" id="timeBox"><small>Время</small><span id="timeLeft">120</span></div>
-    <button id="shuffleBtn">Перемешать</button>
-    <button id="buyShuffleBtn">+1 перемешивание за 10</button>
-  </header>
+<div id="app">
+  <div class="topbar">
+    <button id="modeBtn" class="mode-btn" aria-label="Mode">⏱</button>
+    <button id="shuffleBtn" class="icon-btn" aria-label="Shuffle">🔀</button>
+    <button id="buyShuffleBtn" class="icon-btn" aria-label="Buy shuffle">➕🔀</button>
+    <div class="stat" aria-label="Score"><span class="ico">⭐</span><span class="num" id="score">0</span></div>
+    <div class="stat" aria-label="Coins"><span class="ico">🪙</span><span class="num" id="coins">0</span></div>
+    <div class="stat" aria-label="Moves"><span class="ico">👣</span><span class="num" id="moves">0</span></div>
+    <div class="stat" aria-label="Shuffles"><span class="ico">🔁</span><span class="num" id="shuffles">0</span></div>
+    <div class="stat" id="timeBox" aria-label="Time"><span class="ico">⏳</span><span class="num" id="timeLeft">120</span></div>
+  </div>
 
-  <div id="boardArea">
-    <div id="boardShell">
+  <div id="board-wrap">
+    <div id="board-shell">
       <div id="board"></div>
       <canvas id="fx"></canvas>
     </div>
   </div>
 
-  <aside id="sidebar">
-    <div class="panel">
-      <h3>Магазин</h3>
-      <div class="small">После покупки выбери область на поле пунктирным прозрачным квадратом.</div>
-      <div class="shopItem">
-        <div><b>Синяя резиновая перчатка</b><span>Удаляет одну пилюльку</span></div>
-        <button id="gloveBtn">15</button>
-      </div>
-      <div class="shopItem">
-        <div><b>Бомбочка</b><span>Убирает 4 рядом стоящие ячейки</span></div>
-        <button id="bombBtn">35</button>
-      </div>
-      <div class="shopItem">
-        <div><b>Радужная пилюлька</b><span>Подходит к любому цвету</span></div>
-        <button disabled>Бонус</button>
-      </div>
-      <div class="shopItem">
-        <div><b>Чёрная пилюлька</b><span>Становится случайным цветом при совпадении линии</span></div>
-        <button disabled>Бонус</button>
-      </div>
-      <div class="shopItem">
-        <div><b>Шипучая пилюлька</b><span>0.09% шанс, активируется тапом/перетаскиванием</span></div>
-        <button disabled>Редкая</button>
+  <div id="side">
+    <div class="panel shop">
+      <div class="shop-grid">
+        <button id="gloveBtn" class="shop-btn glove" aria-label="Glove">
+          <div class="ico">🧤</div>
+          <div class="price">15</div>
+        </button>
+        <button id="bombBtn" class="shop-btn bomb" aria-label="Bomb">
+          <div class="ico">💣</div>
+          <div class="price">35</div>
+        </button>
       </div>
     </div>
-    <div class="panel">
-      <h3>Управление</h3>
-      <div class="small">Тяни пилюльки по соседним клеткам. Тап по шипучей пилюльке запускает её. В режиме времени за каждые 1500 очков даётся 1 перемешивание и 10 монет.</div>
-    </div>
-  </aside>
+  </div>
 </div>
+
 <div id="toast"></div>
 
 <script>
 (() => {
-  const ROWS = 8, COLS = 8;
-  const COLORS = ['#ff5f5f','#4db7ff','#7cff73','#ffbf3f','#b85fff','#ff76d8'];
+  const ROWS = 8;
+  const COLS = 8;
+  const COLORS = ['#ff5f60','#4eb8ff','#6ef06f','#ffc94a','#b564ff','#ff72dd'];
   const RAINBOW = 'rainbow';
   const BLACK = 'black';
   const FIZZ = 'fizz';
-  const EMPTY = null;
+  const PURPLE = 'purple';
+
+  const board = document.getElementById('board');
+  const shell = document.getElementById('board-shell');
+  const fx = document.getElementById('fx');
+  const ctx = fx.getContext('2d');
+
   const scoreEl = document.getElementById('score');
   const coinsEl = document.getElementById('coins');
   const movesEl = document.getElementById('moves');
   const shufflesEl = document.getElementById('shuffles');
   const timeLeftEl = document.getElementById('timeLeft');
   const timeBox = document.getElementById('timeBox');
-  const board = document.getElementById('board');
-  const shell = document.getElementById('boardShell');
-  const fx = document.getElementById('fx');
-  const ctx = fx.getContext('2d');
-  const toast = document.getElementById('toast');
+
   const modeBtn = document.getElementById('modeBtn');
   const shuffleBtn = document.getElementById('shuffleBtn');
   const buyShuffleBtn = document.getElementById('buyShuffleBtn');
   const gloveBtn = document.getElementById('gloveBtn');
   const bombBtn = document.getElementById('bombBtn');
+  const toast = document.getElementById('toast');
 
-  let W = 0, H = 0, cell = 0;
   let grid = [];
-  let score = 0, coins = 0, moves = 20, shuffles = 1;
+  let score = 0;
+  let coins = 0;
+  let moves = 1;
+  let shuffles = 1;
   let mode = 'time';
   let timeLeft = 120;
-  let selected = null;
-  let activeTool = null; // 'glove' | 'bomb'
-  let pointer = {down:false, sx:0, sy:0, startCell:null};
-  let scoreMilestone = 0;
-  let falling = false;
-  let gameBusy = false;
   let timer = null;
-  let touched = false;
+  let activeTool = null;
+  let selected = null;
+  let pointerDown = false;
+  let dragStart = null;
+  let cellSize = 0;
+  let boardW = 0;
+  let boardH = 0;
+  let particles = [];
+  let scoreMilestone = 0;
+  let boardLocked = false;
+  let hoverTarget = null;
+
+  function rand(arr){ return arr[(Math.random() * arr.length) | 0]; }
+  function toastMsg(text){
+    toast.textContent = text;
+    toast.classList.add('show');
+    clearTimeout(toast._t);
+    toast._t = setTimeout(() => toast.classList.remove('show'), 1200);
+  }
 
   function resize(){
-    const r = shell.getBoundingClientRect();
-    W = r.width; H = r.height;
-    fx.width = Math.floor(W * devicePixelRatio);
-    fx.height = Math.floor(H * devicePixelRatio);
-    fx.style.width = W+'px'; fx.style.height = H+'px';
-    ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
-    cell = Math.min(W / COLS, H / ROWS);
+    const rect = shell.getBoundingClientRect();
+    boardW = rect.width - 24;
+    boardH = rect.height - 24;
+    fx.width = Math.floor(boardW * devicePixelRatio);
+    fx.height = Math.floor(boardH * devicePixelRatio);
+    fx.style.width = boardW + 'px';
+    fx.style.height = boardH + 'px';
+    ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+    cellSize = Math.min(boardW / COLS, boardH / ROWS);
     board.style.setProperty('--cols', COLS);
     board.style.setProperty('--rows', ROWS);
     render();
   }
   window.addEventListener('resize', resize);
 
-  function toastMsg(msg){
-    toast.textContent = msg;
-    toast.classList.add('show');
-    clearTimeout(toast._t);
-    toast._t = setTimeout(()=>toast.classList.remove('show'), 1300);
-  }
+  function makeItem(forceType = null){
+    if (forceType === RAINBOW) return { type: RAINBOW, color: null, active: true };
+    if (forceType === BLACK) return { type: BLACK, color: null, active: false };
+    if (forceType === FIZZ) return { type: FIZZ, color: null, active: true };
 
-  function rand(arr){ return arr[(Math.random()*arr.length)|0]; }
-  function isSpecial(v){ return v === RAINBOW || v === BLACK || v === FIZZ; }
-  function newItem(forceType=null){
     const p = Math.random();
-    if (forceType) return {type:forceType, color: forceType===RAINBOW||forceType===BLACK||forceType===FIZZ ? null : forceType, active:true};
-    if (p < 0.0009) return {type:FIZZ, color:null, active:true}; // 0.09%
-    if (p < 0.015) return {type:BLACK, color:null, active:false};
-    if (p < 0.03) return {type:RAINBOW, color:null, active:true};
-    return {type:'color', color:rand(COLORS), active:true};
-  }
-
-  function makeGrid(){
-    grid = Array.from({length:ROWS}, ()=>Array.from({length:COLS}, ()=>null));
-    for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
-      let item;
-      do {
-        item = newItem();
-        grid[r][c] = item;
-      } while (hasImmediateMatchAt(r,c));
-    }
-  }
-
-  function hasImmediateMatchAt(r,c){
-    const v = grid[r][c];
-    if (!v || v.type !== 'color') return false;
-    const color = v.color;
-    let count = 1;
-    for(let dc=1;c-dc>=0 && grid[r][c-dc] && matchesColor(grid[r][c-dc], color);dc++) count++;
-    for(let dc=1;c+dc<COLS && grid[r][c+dc] && matchesColor(grid[r][c+dc], color);dc++) count++;
-    if (count>=3) return true;
-    count = 1;
-    for(let dr=1;r-dr>=0 && grid[r-dr][c] && matchesColor(grid[r-dr][c], color);dr++) count++;
-    for(let dr=1;r+dr<ROWS && grid[r+dr][c] && matchesColor(grid[r+dr][c], color);dr++) count++;
-    return count>=3;
+    if (p < 0.0009) return { type: FIZZ, color: null, active: true };
+    if (p < 0.016) return { type: BLACK, color: null, active: false };
+    if (p < 0.032) return { type: RAINBOW, color: null, active: true };
+    return { type: 'color', color: rand(COLORS), active: true };
   }
 
   function matchesColor(item, color){
     if (!item) return false;
     if (item.type === RAINBOW) return true;
     if (item.type === 'color') return item.color === color;
-    if (item.type === BLACK) return false; // dormant until match-processing touches it
     return false;
   }
 
-  function cellToXY(r,c){ return {x: c*cell + cell/2, y: r*cell + cell/2}; }
-  function posToCell(x,y){
-    const c = Math.floor(x / cell);
-    const r = Math.floor(y / cell);
-    if (r<0 || c<0 || r>=ROWS || c>=COLS) return null;
-    return {r,c};
+  function immediateMatchAt(r, c){
+    const item = grid[r][c];
+    if (!item || item.type !== 'color') return false;
+    const color = item.color;
+    let count = 1;
+    for (let dc = 1; c - dc >= 0 && grid[r][c - dc] && matchesColor(grid[r][c - dc], color); dc++) count++;
+    for (let dc = 1; c + dc < COLS && grid[r][c + dc] && matchesColor(grid[r][c + dc], color); dc++) count++;
+    if (count >= 3) return true;
+    count = 1;
+    for (let dr = 1; r - dr >= 0 && grid[r - dr][c] && matchesColor(grid[r - dr][c], color); dr++) count++;
+    for (let dr = 1; r + dr < ROWS && grid[r + dr][c] && matchesColor(grid[r + dr][c], color); dr++) count++;
+    return count >= 3;
   }
+
+  function buildGrid(){
+    grid = Array.from({ length: ROWS }, () => Array.from({ length: COLS }, () => null));
+    for (let r = 0; r < ROWS; r++){
+      for (let c = 0; c < COLS; c++){
+        let item;
+        do {
+          item = makeItem();
+          grid[r][c] = item;
+        } while (immediateMatchAt(r, c));
+      }
+    }
+  }
+
+  function cellCenter(r, c){
+    return { x: c * cellSize + cellSize / 2, y: r * cellSize + cellSize / 2 };
+  }
+
+  function getCellFromPoint(x, y){
+    const c = Math.floor(x / cellSize);
+    const r = Math.floor(y / cellSize);
+    if (r < 0 || c < 0 || r >= ROWS || c >= COLS) return null;
+    return { r, c };
+  }
+
+  function getItem(r, c){ return grid[r]?.[c] ?? null; }
+  function setItem(r, c, item){ grid[r][c] = item; }
+  function swap(a, b){ const t = grid[a.r][a.c]; grid[a.r][a.c] = grid[b.r][b.c]; grid[b.r][b.c] = t; }
+  function isAdjacent(a, b){ return Math.abs(a.r - b.r) + Math.abs(a.c - b.c) === 1; }
 
   function render(){
     board.innerHTML = '';
-    const line = document.createElement('div');
-    line.className='cellLine';
-    board.appendChild(line);
-    for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
-      const item = grid[r][c];
-      if(!item) continue;
-      const el = document.createElement('div');
-      el.className = 'cell';
-      el.dataset.r = r; el.dataset.c = c;
-      el.style.left = (c*cell + cell/2) + 'px';
-      el.style.top = (r*cell + cell/2) + 'px';
-      el.style.width = cell + 'px';
-      el.style.height = cell + 'px';
-      if (selected && selected.r===r && selected.c===c) el.classList.add('selected');
-      if (activeTool && toolTarget && toolTarget.r===r && toolTarget.c===c) el.classList.add('hintSwap');
-      const cap = document.createElement('div');
-      cap.className='capsule';
-      if(item.type==='color') cap.style.background = `linear-gradient(180deg, color-mix(in srgb, ${item.color} 78%, white 22%), ${item.color})`;
-      else if(item.type===RAINBOW) cap.style.background = 'linear-gradient(90deg, #ff4d4d, #ffbd45, #72ff75, #47d0ff, #b56cff, #ff6ad9)';
-      else if(item.type===BLACK) cap.style.background = 'linear-gradient(180deg, #262626, #050505)';
-      else if(item.type===FIZZ) cap.style.background = 'linear-gradient(180deg, #dfffff, #7ef8ff)';
-      el.appendChild(cap);
-      if(item.type===BLACK){
-        const v = document.createElement('div');
-        v.style.position='absolute';v.style.inset='24% 34% 24% 34%';v.style.borderRadius='999px';v.style.background='rgba(255,255,255,.12)';v.style.boxShadow='0 0 10px rgba(255,255,255,.08) inset';
-        el.appendChild(v);
-      }
-      if(item.type===FIZZ){
-        el.style.filter = 'drop-shadow(0 0 10px rgba(127,255,255,.45))';
-      }
-      board.appendChild(el);
-    }
-  }
 
-  function getItem(r,c){ return grid[r]?.[c] ?? null; }
-  function setItem(r,c,item){ grid[r][c]=item; }
-  function swap(a,b){ const t=grid[a.r][a.c]; grid[a.r][a.c]=grid[b.r][b.c]; grid[b.r][b.c]=t; }
-  function adjacent(a,b){ return Math.abs(a.r-b.r)+Math.abs(a.c-b.c)===1; }
+    const gridLines = document.createElement('div');
+    gridLines.className = 'grid-lines';
+    board.appendChild(gridLines);
 
-  function findMatches(){
-    const matched = new Map(); // key -> item
-    const groups = [];
-    // Horizontal
-    for(let r=0;r<ROWS;r++){
-      let c=0;
-      while(c<COLS){
-        const start = c;
-        const base = grid[r][c];
-        if (!base){ c++; continue; }
-        let color = (base.type==='color') ? base.color : null;
-        if (base.type===BLACK){ c++; continue; }
-        c++;
-        while(c<COLS && grid[r][c] && (matchesColor(grid[r][c], color) || grid[r][c].type===BLACK)) c++;
-        const len = c-start;
-        if (len>=3){
-          const cells=[];
-          for(let x=start;x<c;x++) cells.push({r,c:x,item:grid[r][x]});
-          groups.push(cells);
+    for (let r = 0; r < ROWS; r++){
+      for (let c = 0; c < COLS; c++){
+        const item = grid[r][c];
+        if (!item) continue;
+
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        if (selected && selected.r === r && selected.c === c) cell.classList.add('selected');
+        if (hoverTarget && hoverTarget.r === r && hoverTarget.c === c) cell.classList.add('target');
+
+        cell.style.left = (c * cellSize + cellSize / 2) + 'px';
+        cell.style.top = (r * cellSize + cellSize / 2) + 'px';
+        cell.style.width = cellSize + 'px';
+        cell.style.height = cellSize + 'px';
+
+        const capsule = document.createElement('div');
+        capsule.className = 'capsule';
+        if (item.type === 'color'){
+          capsule.classList.add('normal');
+          capsule.style.background = `linear-gradient(180deg, color-mix(in srgb, ${item.color} 78%, white 22%), ${item.color})`;
+        } else if (item.type === RAINBOW){
+          capsule.classList.add('rainbow');
+        } else if (item.type === BLACK){
+          capsule.classList.add('black');
+        } else if (item.type === FIZZ){
+          capsule.classList.add('fizz');
+          capsule.style.background = 'linear-gradient(180deg, #efffff, #77f8ff)';
         }
-      }
-    }
-    // Vertical
-    for(let c=0;c<COLS;c++){
-      let r=0;
-      while(r<ROWS){
-        const start = r;
-        const base = grid[r][c];
-        if (!base){ r++; continue; }
-        let color = (base.type==='color') ? base.color : null;
-        if (base.type===BLACK){ r++; continue; }
-        r++;
-        while(r<ROWS && grid[r][c] && (matchesColor(grid[r][c], color) || grid[r][c].type===BLACK)) r++;
-        const len = r-start;
-        if (len>=3){
-          const cells=[];
-          for(let y=start;y<r;y++) cells.push({r:y,c,item:grid[y][c]});
-          groups.push(cells);
+
+        if (item.type === BLACK && item.active){
+          const glow = document.createElement('div');
+          glow.className = 'badge-active';
+          cell.appendChild(glow);
         }
+
+        cell.appendChild(capsule);
+        board.appendChild(cell);
       }
     }
-    // Flatten unique cells and track blacks in a matched group
-    for(const group of groups){
-      for(const cellRef of group){
-        const k = cellRef.r + ',' + cellRef.c;
-        if (!matched.has(k)) matched.set(k, cellRef.item);
-      }
+  }
+
+  function burst(x, y, kind = 'normal', count = 16){
+    const palette = kind === 'fizz'
+      ? ['#ffffff', '#d8ffff', '#a8f7ff']
+      : ['#ffffff', '#eff4ff', '#a8c5ff'];
+
+    for (let i = 0; i < count; i++){
+      particles.push({
+        x, y,
+        vx: (Math.random() * 2 - 1) * (kind === 'fizz' ? 4.2 : 3.0),
+        vy: (Math.random() * 2 - 1) * (kind === 'fizz' ? 4.2 : 3.0),
+        life: 34 + Math.random() * 14,
+        r: 1.5 + Math.random() * 2.4,
+        col: rand(palette)
+      });
     }
-    return {matched, groups};
   }
 
-  function colorForBlack(){ return rand(COLORS); }
-
-  function explodeParticles(x,y,kind='small',count=14){
-    const colors = kind==='fizz' ? ['#ffffff','#bffcff','#8ef7ff'] : ['#ffffff','#d7e5ff','#8db7ff'];
-    for(let i=0;i<count;i++) particles.push({x,y,vx:(Math.random()*2-1)*(kind==='fizz'?3.8:2.6),vy:(Math.random()*2-1)*(kind==='fizz'?3.8:2.6),life:38+Math.random()*20,r:1.6+Math.random()*2.2,col:rand(colors)});
-  }
-
-  let particles=[];
   function fxLoop(){
-    ctx.clearRect(0,0,W,H);
-    particles = particles.filter(p=>p.life>0);
-    for(const p of particles){
-      p.life--;
+    ctx.clearRect(0, 0, boardW, boardH);
+    particles = particles.filter(p => p.life > 0);
+    for (const p of particles){
+      p.life -= 1;
       p.x += p.vx;
       p.y += p.vy;
       p.vy += 0.06;
-      ctx.globalAlpha = Math.max(0, Math.min(1, p.life/40));
+      ctx.globalAlpha = Math.max(0, Math.min(1, p.life / 38));
       ctx.fillStyle = p.col;
-      ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill();
-      if (Math.random()<0.15){
-        ctx.strokeStyle = 'rgba(255,255,255,.35)';
-        ctx.beginPath(); ctx.arc(p.x,p.y,p.r+2,0,Math.PI*2); ctx.stroke();
-      }
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fill();
     }
     ctx.globalAlpha = 1;
     requestAnimationFrame(fxLoop);
   }
 
-  function addScore(n){
-    score += n;
+  function addScore(amount){
+    score += amount;
     scoreEl.textContent = score;
-    const nextMilestone = Math.floor(score/1500);
-    while(nextMilestone > scoreMilestone){
-      scoreMilestone++;
-      shuffles++;
+
+    const milestone = Math.floor(score / 1500);
+    while (milestone > scoreMilestone){
+      scoreMilestone += 1;
+      shuffles += 1;
       coins += 10;
       shufflesEl.textContent = shuffles;
       coinsEl.textContent = coins;
-      toastMsg('Бонус: +1 перемешивание и +10 монет');
+      toastMsg('+1 🔀  +10 🪙');
     }
   }
 
   function refill(){
-    for(let c=0;c<COLS;c++){
+    for (let c = 0; c < COLS; c++){
       let empty = 0;
-      for(let r=ROWS-1;r>=0;r--){
-        if(!grid[r][c]) empty++;
-        else if(empty>0){
-          grid[r+empty][c] = grid[r][c];
+      for (let r = ROWS - 1; r >= 0; r--){
+        if (!grid[r][c]) empty++;
+        else if (empty > 0){
+          grid[r + empty][c] = grid[r][c];
           grid[r][c] = null;
         }
       }
-      for(let r=0;r<ROWS;r++) if(!grid[r][c]) grid[r][c] = newItem();
+      for (let r = 0; r < ROWS; r++){
+        if (!grid[r][c]) grid[r][c] = makeItem();
+      }
     }
   }
 
-  function resolveMatches(){
-    let loops=0;
-    while(true){
-      const {matched, groups} = findMatches();
-      if (matched.size===0) break;
-      loops++;
-      // Black pills in matched groups turn into random colors instead of disappearing
-      const toKeep = new Set();
-      for(const group of groups){
-        const hasBlack = group.some(x=>x.item && x.item.type===BLACK);
+  function collectMatches(){
+    const groups = [];
+
+    for (let r = 0; r < ROWS; r++){
+      let c = 0;
+      while (c < COLS){
+        const start = c;
+        const base = grid[r][c];
+        if (!base){ c++; continue; }
+        if (base.type === BLACK){ c++; continue; }
+
+        const color = base.type === 'color' ? base.color : null;
+        c++;
+        while (c < COLS && grid[r][c] && (matchesColor(grid[r][c], color) || grid[r][c].type === BLACK)) c++;
+        if (c - start >= 3) groups.push({ axis: 'row', items: Array.from({ length: c - start }, (_, i) => ({ r, c: start + i, item: grid[r][start + i] })) });
+      }
+    }
+
+    for (let c = 0; c < COLS; c++){
+      let r = 0;
+      while (r < ROWS){
+        const start = r;
+        const base = grid[r][c];
+        if (!base){ r++; continue; }
+        if (base.type === BLACK){ r++; continue; }
+
+        const color = base.type === 'color' ? base.color : null;
+        r++;
+        while (r < ROWS && grid[r][c] && (matchesColor(grid[r][c], color) || grid[r][c].type === BLACK)) r++;
+        if (r - start >= 3) groups.push({ axis: 'col', items: Array.from({ length: r - start }, (_, i) => ({ r: start + i, c, item: grid[start + i][c] })) });
+      }
+    }
+
+    return groups;
+  }
+
+  function resolveBoard(){
+    if (boardLocked) return;
+    boardLocked = true;
+    let didSomething = false;
+
+    while (true){
+      const groups = collectMatches();
+      if (!groups.length) break;
+      didSomething = true;
+      const keep = new Set();
+
+      for (const group of groups){
+        const hasBlack = group.items.some(x => x.item && x.item.type === BLACK);
         if (hasBlack){
-          for(const x of group){
-            if (x.item && x.item.type===BLACK){
-              x.item.type='color';
-              x.item.color = colorForBlack();
+          for (const x of group.items){
+            if (x.item && x.item.type === BLACK){
+              x.item.type = 'color';
+              x.item.color = rand(COLORS);
               x.item.active = true;
-              toKeep.add(x.r+','+x.c);
-            } else {
-              // matched neighbor clears
+              keep.add(`${x.r},${x.c}`);
+              const p = cellCenter(x.r, x.c);
+              burst(p.x, p.y, 'normal', 12);
             }
           }
         }
       }
-      // clear everything else matched
-      for(const [k,item] of matched.entries()){
-        if (toKeep.has(k)) continue;
-        const [r,c] = k.split(',').map(Number);
-        if (grid[r][c]){
-          const x = c*cell + cell/2, y = r*cell + cell/2;
-          explodeParticles(x,y, item?.type===FIZZ ? 'fizz' : 'small', item?.type===FIZZ ? 22 : 12);
-          if (item && item.type===FIZZ){
-            // fizz clears selected row/column if it was activated by tap/drag; it is already marked active when created.
-          }
-          grid[r][c] = null;
+
+      for (const group of groups){
+        for (const x of group.items){
+          const key = `${x.r},${x.c}`;
+          if (keep.has(key)) continue;
+          const item = grid[x.r][x.c];
+          if (!item) continue;
+          const p = cellCenter(x.r, x.c);
+          burst(p.x, p.y, item.type === FIZZ ? 'fizz' : 'normal', item.type === FIZZ ? 18 : 12);
+          grid[x.r][x.c] = null;
         }
       }
+
       refill();
-      addScore(100 * matched.size);
+      addScore(100 * groups.reduce((sum, g) => sum + g.items.length, 0));
     }
-    if (loops>0) render();
+
+    if (didSomething){
+      render();
+      ensurePlayable();
+    }
+    boardLocked = false;
   }
 
-  function hasAnyMoves(){
-    // brute force swap scan
-    for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
-      const a={r,c};
-      for(const d of [{r:1,c:0},{r:0,c:1}]){
-        const b={r:r+d.r,c:c+d.c};
-        if(b.r>=ROWS||b.c>=COLS) continue;
-        swap(a,b);
-        const ok = findMatches().matched.size>0;
-        swap(a,b);
-        if(ok) return true;
+  function hasMoves(){
+    for (let r = 0; r < ROWS; r++){
+      for (let c = 0; c < COLS; c++){
+        const a = { r, c };
+        for (const d of [{ r: 1, c: 0 }, { r: 0, c: 1 }]){
+          const b = { r: r + d.r, c: c + d.c };
+          if (b.r >= ROWS || b.c >= COLS) continue;
+          swap(a, b);
+          const found = collectMatches().length > 0;
+          swap(a, b);
+          if (found) return true;
+        }
       }
     }
     return false;
   }
 
   function shuffleBoard(){
-    if (shuffles<=0 || gameBusy) return toastMsg('Нет перемешиваний');
-    shuffles--;
+    if (shuffles <= 0 || boardLocked) return toastMsg('⛔');
+    shuffles -= 1;
     shufflesEl.textContent = shuffles;
-    const arr=[];
-    for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) arr.push(grid[r][c]);
-    for(let i=arr.length-1;i>0;i--){ const j=(Math.random()*(i+1))|0; [arr[i],arr[j]]=[arr[j],arr[i]]; }
-    let idx=0;
-    for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) grid[r][c]=arr[idx++];
-    resolveMatches();
-    if(!hasAnyMoves()) shuffleBoard();
+
+    const items = [];
+    for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) items.push(grid[r][c]);
+
+    for (let i = items.length - 1; i > 0; i--){
+      const j = (Math.random() * (i + 1)) | 0;
+      [items[i], items[j]] = [items[j], items[i]];
+    }
+
+    let k = 0;
+    for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) grid[r][c] = items[k++];
+
+    resolveBoard();
+    if (!hasMoves()) shuffleBoard();
     render();
   }
 
-  function applyMoveExtraIfNeeded(){
-    if (moves<=0){
+  function grantFallbackMove(){
+    if (moves <= 0) moves = 1;
+    movesEl.textContent = moves;
+  }
+
+  function spendMove(){
+    if (moves <= 0){
       moves = 1;
-      toastMsg('Последний шанс: +1 ход');
+      toastMsg('👣1');
     } else {
-      moves--;
+      moves -= 1;
     }
     movesEl.textContent = moves;
   }
 
-  function endTurn(){
-    if (!hasAnyMoves()){
-      if (shuffles>0){
-        shuffleBoard();
-      } else if (moves<=0){
-        moves = 1;
-        movesEl.textContent = moves;
-        toastMsg('Нет ходов: добавлен 1 дополнительный ход');
-      }
+  function activateFizzAt(r, c){
+    const item = getItem(r, c);
+    if (!item || item.type !== FIZZ) return false;
+    const horizontal = Math.random() < 0.5;
+    const list = [];
+    if (horizontal){
+      for (let x = 0; x < COLS; x++) list.push({ r, c: x });
+    } else {
+      for (let y = 0; y < ROWS; y++) list.push({ r: y, c });
     }
-  }
 
-  function activateFizzAt(r,c){
-    const item = getItem(r,c);
-    if(!item || item.type!==FIZZ) return false;
-    const rowOrCol = Math.random()<0.5 ? 'row' : 'col';
-    const indices=[];
-    if (rowOrCol==='row') for(let x=0;x<COLS;x++) indices.push({r,c:x});
-    else for(let y=0;y<ROWS;y++) indices.push({r:y,c});
-    const baseX = c*cell + cell/2, baseY = r*cell + cell/2;
-    for(const p of indices){
-      const t = getItem(p.r,p.c);
-      if (t){
-        explodeParticles(p.c*cell+cell/2, p.r*cell+cell/2, 'fizz', 9);
+    for (const p of list){
+      if (grid[p.r][p.c]){
+        const center = cellCenter(p.r, p.c);
+        burst(center.x, center.y, 'fizz', 10);
         grid[p.r][p.c] = null;
       }
     }
+
     refill();
     addScore(300);
     render();
-    toastMsg(rowOrCol==='row' ? 'Шипучая пилюлька очистила ряд' : 'Шипучая пилюлька очистила колонку');
     return true;
   }
 
-  function trySwap(a,b){
-    if (!a || !b || !adjacent(a,b) || gameBusy) return false;
-    const ia = getItem(a.r,a.c), ib = getItem(b.r,b.c);
-    if (!ia || !ib) return false;
-    swap(a,b);
-    render();
-    const m = findMatches().matched.size;
-    if (m>0){
-      applyMoveExtraIfNeeded();
-      resolveMatches();
-      endTurn();
-      if (mode==='time') maybeGrantTimeMode();
-      if (!hasAnyMoves()){
-        if (shuffles>0) toastMsg('Нет видимых ходов — использовано перемешивание');
-        else if (moves<=0){ moves=1; movesEl.textContent = moves; }
-      }
-      render();
-      return true;
-    }
-    // revert
-    swap(a,b);
-    render();
-    toastMsg('Не получилось');
-    return false;
+  function clearTool(){
+    activeTool = null;
+    hoverTarget = null;
+    gloveBtn.classList.remove('active-tool');
+    bombBtn.classList.remove('active-tool');
+    document.body.style.cursor = 'default';
   }
 
-  function maybeGrantTimeMode(){
-    // reward handled by score milestones; keep the mode button meaningful
-  }
-
-  let toolTarget = null;
-  function setActiveTool(tool){
+  function activateTool(tool){
     activeTool = tool;
-    toolTarget = null;
-    document.body.style.cursor = tool ? 'crosshair' : 'default';
-    render();
+    hoverTarget = null;
+    gloveBtn.classList.toggle('active-tool', tool === 'glove');
+    bombBtn.classList.toggle('active-tool', tool === 'bomb');
+    document.body.style.cursor = 'crosshair';
   }
 
-  function buyTool(which){
-    if (which==='glove' && coins < 15) return toastMsg('Не хватает монет');
-    if (which==='bomb' && coins < 35) return toastMsg('Не хватает монет');
-    if (which==='glove') coins -= 15;
-    if (which==='bomb') coins -= 35;
+  function buyTool(tool){
+    if (tool === 'glove' && coins < 15) return toastMsg('⛔');
+    if (tool === 'bomb' && coins < 35) return toastMsg('⛔');
+
+    if (tool === 'glove') coins -= 15;
+    if (tool === 'bomb') coins -= 35;
     coinsEl.textContent = coins;
-    setActiveTool(which);
-    toastMsg(which==='glove' ? 'Выбрана перчатка: тапни по пилюльке' : 'Выбрана бомбочка: выбери 2x2 область');
+    activateTool(tool);
   }
 
-  function pickTarget(r,c){
-    if (!activeTool) return;
-    const item = getItem(r,c);
-    if (!item) return;
-    if (activeTool==='glove'){
-      explodeParticles(c*cell+cell/2, r*cell+cell/2, 'small', 18);
+  function applyToolAt(r, c){
+    if (!activeTool) return false;
+    const item = getItem(r, c);
+    if (!item) return false;
+
+    if (activeTool === 'glove'){
+      const p = cellCenter(r, c);
+      burst(p.x, p.y, 'normal', 16);
       grid[r][c] = null;
       refill();
       addScore(40);
       render();
-      setActiveTool(null);
-      return;
+      clearTool();
+      resolveBoard();
+      return true;
     }
-    if (activeTool==='bomb'){
-      toolTarget = {r,c};
+
+    if (activeTool === 'bomb'){
+      hoverTarget = { r, c };
       render();
-      // transparent dashed square on selected area
       const area = [
-        {r,c}, {r,c:c+1}, {r:r+1,c}, {r:r+1,c:c+1}
-      ].filter(p=>p.r<ROWS && p.c<COLS);
-      for(const p of area){
-        if(grid[p.r][p.c]){
-          explodeParticles(p.c*cell+cell/2, p.r*cell+cell/2, 'fizz', 12);
+        { r, c },
+        { r, c: c + 1 },
+        { r: r + 1, c },
+        { r: r + 1, c: c + 1 }
+      ].filter(p => p.r < ROWS && p.c < COLS);
+
+      for (const p of area){
+        if (grid[p.r][p.c]){
+          const center = cellCenter(p.r, p.c);
+          burst(center.x, center.y, 'fizz', 12);
           grid[p.r][p.c] = null;
         }
       }
+
       refill();
       addScore(180);
       render();
-      setActiveTool(null);
-      return;
+      clearTool();
+      resolveBoard();
+      return true;
     }
+
+    return false;
   }
 
-  function clearFx(){ ctx.clearRect(0,0,W,H); }
+  function trySwap(a, b){
+    if (!a || !b || !isAdjacent(a, b) || boardLocked) return false;
 
-  function cellFromEvent(e){
-    const rect = board.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    return posToCell(x,y);
+    swap(a, b);
+    render();
+
+    const found = collectMatches().length > 0;
+    if (found){
+      spendMove();
+      resolveBoard();
+      ensurePlayable();
+      return true;
+    }
+
+    swap(a, b);
+    render();
+    toastMsg('⟲');
+    return false;
   }
 
-  board.addEventListener('pointerdown', (e)=>{
-    if (gameBusy) return;
-    board.setPointerCapture?.(e.pointerId);
-    const c = cellFromEvent(e);
-    if (!c) return;
-    touched = true;
-    pointer.down = true;
-    pointer.sx = e.clientX; pointer.sy = e.clientY;
-    pointer.startCell = c;
-    const item = getItem(c.r,c.c);
-    if (activeTool){
-      pickTarget(c.r,c.c);
-      return;
+  function ensurePlayable(){
+    let guard = 0;
+    while (!hasMoves() && guard < 8){
+      guard++;
+      if (shuffles > 0){
+        shuffleBoard();
+      } else {
+        grantFallbackMove();
+        break;
+      }
     }
-    if (item && item.type===FIZZ){
-      activateFizzAt(c.r,c.c);
-      return;
-    }
-    selected = c;
-    render();
-  });
-
-  board.addEventListener('pointermove', (e)=>{
-    if (!pointer.down || !pointer.startCell || activeTool) return;
-    const dx = e.clientX - pointer.sx, dy = e.clientY - pointer.sy;
-    const absx = Math.abs(dx), absy = Math.abs(dy);
-    if (Math.max(absx,absy) < cell * 0.2) return;
-    const from = pointer.startCell;
-    const dir = absx > absy ? {r:0,c: dx>0 ? 1 : -1} : {r: dy>0 ? 1 : -1,c:0};
-    const to = {r: from.r + dir.r, c: from.c + dir.c};
-    if (to.r<0||to.c<0||to.r>=ROWS||to.c>=COLS) return;
-    const a = from, b = to;
-    pointer.down = false;
-    selected = null;
-    trySwap(a,b);
-  });
-
-  board.addEventListener('pointerup', (e)=>{
-    const c = cellFromEvent(e);
-    pointer.down = false;
-    if (!c) { selected = null; render(); return; }
-    const item = getItem(c.r,c.c);
-    if (activeTool){
-      pickTarget(c.r,c.c);
-      return;
-    }
-    if (selected && selected.r===c.r && selected.c===c.c){
-      // tap on fizz to activate already handled on down
-      if (item && item.type===FIZZ) activateFizzAt(c.r,c.c);
-      return;
-    }
-    if (!selected){
-      selected = c; render(); return;
-    }
-    if (adjacent(selected,c)){
-      trySwap(selected,c);
-      selected = null;
-    } else {
-      selected = c;
-    }
-    render();
-  });
-
-  board.addEventListener('click', (e)=>{
-    const c = cellFromEvent(e);
-    if (!c) return;
-    const item = getItem(c.r,c.c);
-    if (item && item.type===FIZZ) activateFizzAt(c.r,c.c);
-  });
-
-  modeBtn.addEventListener('click', ()=>{
-    mode = mode==='time' ? 'classic' : 'time';
-    modeBtn.textContent = 'Режим: ' + (mode==='time' ? 'время' : 'классика');
-    modeBtn.classList.toggle('activeMode', mode==='time');
-    timeBox.style.display = mode==='time' ? '' : 'none';
-    if(mode==='time' && !timer) startTimer();
-    toastMsg(mode==='time' ? 'Включён режим на время' : 'Включена классика');
-  });
-
-  shuffleBtn.addEventListener('click', shuffleBoard);
-  buyShuffleBtn.addEventListener('click', ()=>{
-    if (coins < 10) return toastMsg('Не хватает монет');
-    coins -= 10;
-    shuffles += 1;
-    coinsEl.textContent = coins;
-    shufflesEl.textContent = shuffles;
-    toastMsg('+1 перемешивание куплено');
-  });
-  gloveBtn.addEventListener('click', ()=>buyTool('glove'));
-  bombBtn.addEventListener('click', ()=>buyTool('bomb'));
+  }
 
   function startTimer(){
     if (timer) clearInterval(timer);
-    timer = setInterval(()=>{
+    timer = setInterval(() => {
       if (mode !== 'time') return;
-      timeLeft--;
-      timeLeftEl.textContent = timeLeft;
-      if (timeLeft <= 0){
+      if (timeLeft > 0){
+        timeLeft -= 1;
+        timeLeftEl.textContent = timeLeft;
+      } else {
         clearInterval(timer);
         timer = null;
-        toastMsg('Время вышло');
       }
     }, 1000);
   }
 
-  function ensurePlayable(){
-    let safety = 0;
-    while(!hasAnyMoves() && safety++ < 10){
-      shuffleBoard();
-    }
+  function setMode(next){
+    mode = next;
+    modeBtn.classList.toggle('active', mode === 'time');
+    timeBox.style.display = mode === 'time' ? '' : 'none';
+    if (mode === 'time' && !timer) startTimer();
   }
 
   function init(){
-    makeGrid();
-    // guarantee no immediate matches after creation
-    let guard=0;
-    while(findMatches().matched.size>0 && guard++ < 10){
-      makeGrid();
-    }
-    render();
-    resize();
-    ensurePlayable();
+    buildGrid();
     scoreEl.textContent = score;
     coinsEl.textContent = coins;
     movesEl.textContent = moves;
     shufflesEl.textContent = shuffles;
     timeLeftEl.textContent = timeLeft;
-    modeBtn.classList.add('activeMode');
+    setMode('time');
+    resize();
+    ensurePlayable();
+    render();
     startTimer();
-    setInterval(()=>{
-      if (mode==='time' && timeLeft>0 && !hasAnyMoves()) ensurePlayable();
-      if (!hasAnyMoves()){
-        if (shuffles>0) toastMsg('Нет ходов — есть перемешивание');
-        else if (moves<=0){ moves = 1; movesEl.textContent = moves; }
-      }
-    }, 1300);
     requestAnimationFrame(fxLoop);
   }
 
-  // Re-run resolve after load to settle any accidental chains.
-  setTimeout(()=>{ resolveMatches(); ensurePlayable(); render(); }, 50);
+  board.addEventListener('pointerdown', (e) => {
+    if (boardLocked) return;
+    const rect = board.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const cell = getCellFromPoint(x, y);
+    if (!cell) return;
+
+    pointerDown = true;
+    dragStart = cell;
+
+    if (activeTool){
+      applyToolAt(cell.r, cell.c);
+      return;
+    }
+
+    const item = getItem(cell.r, cell.c);
+    if (item && item.type === FIZZ){
+      activateFizzAt(cell.r, cell.c);
+      return;
+    }
+
+    selected = cell;
+    render();
+  });
+
+  board.addEventListener('pointermove', (e) => {
+    if (!pointerDown || !dragStart || activeTool) return;
+    const rect = board.getBoundingClientRect();
+    const dx = e.clientX - rect.left - (dragStart.c * cellSize + cellSize / 2);
+    const dy = e.clientY - rect.top - (dragStart.r * cellSize + cellSize / 2);
+    const adx = Math.abs(dx), ady = Math.abs(dy);
+    if (Math.max(adx, ady) < cellSize * 0.22) return;
+
+    const dir = adx > ady ? { r: 0, c: dx > 0 ? 1 : -1 } : { r: dy > 0 ? 1 : -1, c: 0 };
+    const target = { r: dragStart.r + dir.r, c: dragStart.c + dir.c };
+    if (target.r < 0 || target.c < 0 || target.r >= ROWS || target.c >= COLS) return;
+    pointerDown = false;
+    selected = null;
+    trySwap(dragStart, target);
+  });
+
+  board.addEventListener('pointerup', (e) => {
+    const rect = board.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const cell = getCellFromPoint(x, y);
+    pointerDown = false;
+
+    if (!cell){
+      selected = null;
+      render();
+      return;
+    }
+
+    if (activeTool){
+      applyToolAt(cell.r, cell.c);
+      return;
+    }
+
+    const item = getItem(cell.r, cell.c);
+    if (item && item.type === FIZZ){
+      activateFizzAt(cell.r, cell.c);
+      return;
+    }
+
+    if (selected && selected.r === cell.r && selected.c === cell.c){
+      render();
+      return;
+    }
+
+    if (selected && isAdjacent(selected, cell)){
+      trySwap(selected, cell);
+      selected = null;
+    } else {
+      selected = cell;
+    }
+    render();
+  });
+
+  board.addEventListener('click', (e) => {
+    const rect = board.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const cell = getCellFromPoint(x, y);
+    if (!cell) return;
+    const item = getItem(cell.r, cell.c);
+    if (item && item.type === FIZZ) activateFizzAt(cell.r, cell.c);
+  });
+
+  modeBtn.addEventListener('click', () => setMode(mode === 'time' ? 'classic' : 'time'));
+  shuffleBtn.addEventListener('click', shuffleBoard);
+  buyShuffleBtn.addEventListener('click', () => {
+    if (coins < 10) return toastMsg('⛔');
+    coins -= 10;
+    shuffles += 1;
+    coinsEl.textContent = coins;
+    shufflesEl.textContent = shuffles;
+  });
+  gloveBtn.addEventListener('click', () => buyTool('glove'));
+  bombBtn.addEventListener('click', () => buyTool('bomb'));
+
+  document.addEventListener('pointerdown', (e) => {
+    if (!activeTool) return;
+    const rect = board.getBoundingClientRect();
+    if (e.clientX < rect.left || e.clientX > rect.right || e.clientY < rect.top || e.clientY > rect.bottom) return;
+  });
+
+  function ensureBlackActivationVisibility(){
+    // No-op retained for clarity: black pills visibly turn into colored pills on the board when part of a match.
+  }
+
+  function gameTick(){
+    if (mode === 'time' && timeLeft <= 0) return;
+    if (!hasMoves() && !boardLocked){
+      if (shuffles > 0) shuffleBoard();
+      else grantFallbackMove();
+    }
+  }
+
+  setInterval(gameTick, 1000);
   init();
 })();
 </script>
