@@ -6,26 +6,23 @@
   <title>Match 3 Pills</title>
   <style>
     :root{
-      --bg0:#0a0d14;
-      --bg1:#101725;
-      --bg2:#182235;
+      --bg0:#090c12;
+      --bg1:#101827;
+      --bg2:#162235;
       --panel:rgba(255,255,255,.07);
-      --panel2:rgba(255,255,255,.11);
       --line:rgba(255,255,255,.09);
-      --text:#f4f7ff;
-      --muted:#aeb7cc;
-      --cyan:#7fdcff;
-      --good:#70e090;
-      --warn:#ffcf5a;
-      --danger:#ff6868;
-      --shadow:0 18px 48px rgba(0,0,0,.36);
+      --text:#f5f8ff;
+      --muted:#adb8cf;
+      --shadow:0 18px 48px rgba(0,0,0,.34);
     }
 
     html,body{
-      margin:0;height:100%;overflow:hidden;
+      margin:0;
+      height:100%;
+      overflow:hidden;
       background:
-        radial-gradient(circle at top, rgba(53, 85, 140, .32), transparent 32%),
-        radial-gradient(circle at bottom, rgba(121, 65, 168, .18), transparent 28%),
+        radial-gradient(circle at top, rgba(60, 95, 150, .22), transparent 34%),
+        radial-gradient(circle at bottom, rgba(120, 70, 170, .18), transparent 28%),
         linear-gradient(180deg, var(--bg1), var(--bg0) 78%);
       color:var(--text);
       font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
@@ -37,46 +34,52 @@
     #app{
       height:100%;
       display:grid;
-      grid-template-columns:minmax(0,1fr) minmax(210px,260px);
-      grid-template-rows:auto minmax(0,1fr);
+      grid-template-rows:auto minmax(0,1fr) auto;
       gap:12px;
       padding:12px;
     }
 
-    .topbar{
-      grid-column:1 / -1;
+    .topbar,.bottombar{
       display:flex;
       align-items:center;
       flex-wrap:wrap;
       gap:10px;
       padding:10px;
       border-radius:22px;
-      background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.035));
+      background:linear-gradient(180deg, rgba(255,255,255,.085), rgba(255,255,255,.035));
       border:1px solid var(--line);
       box-shadow:var(--shadow);
       backdrop-filter:blur(12px);
     }
 
-    .icon-btn,.mode-btn{
+    .topbar{justify-content:flex-start}
+    .bottombar{justify-content:center}
+
+    .icon-btn,.mode-btn,.bonus-btn,.pause-btn{
       border:none;
       border-radius:18px;
+      min-width:46px;
+      min-height:46px;
       padding:10px 12px;
-      min-width:44px;
-      min-height:44px;
-      background:linear-gradient(180deg, rgba(255,255,255,.11), rgba(255,255,255,.05));
+      background:linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.05));
       color:var(--text);
       box-shadow:0 8px 18px rgba(0,0,0,.22);
       display:inline-flex;
       align-items:center;
       justify-content:center;
       gap:8px;
-      font-weight:800;
+      font-weight:900;
       font-size:15px;
+      white-space:nowrap;
     }
 
     .mode-btn.active{
-      background:linear-gradient(180deg, rgba(20, 120, 150, .78), rgba(15, 60, 85, .92));
-      box-shadow:0 0 0 1px rgba(128, 240, 255, .18), 0 12px 28px rgba(0,0,0,.28);
+      background:linear-gradient(180deg, rgba(25, 125, 165, .82), rgba(14, 58, 82, .94));
+      box-shadow:0 0 0 1px rgba(130, 230, 255, .16), 0 12px 28px rgba(0,0,0,.28);
+    }
+
+    .pause-btn.active{
+      background:linear-gradient(180deg, rgba(150, 120, 30, .78), rgba(82, 60, 8, .92));
     }
 
     .stat{
@@ -91,8 +94,8 @@
       font-weight:800;
     }
 
-    .stat .ico{font-size:18px; width:20px; text-align:center}
-    .stat .num{min-width:24px}
+    .stat .ico{font-size:18px;width:20px;text-align:center}
+    .stat .num{min-width:24px;text-align:left}
 
     #board-wrap{
       min-width:0;
@@ -106,7 +109,7 @@
       aspect-ratio:1;
       border-radius:28px;
       background:
-        radial-gradient(circle at 30% 20%, rgba(255,255,255,.07), transparent 30%),
+        radial-gradient(circle at 30% 20%, rgba(255,255,255,.06), transparent 28%),
         linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
       border:1px solid var(--line);
       box-shadow:var(--shadow);
@@ -120,14 +123,16 @@
       height:100%;
       border-radius:20px;
       background:
-        radial-gradient(circle at top, rgba(255,255,255,.06), transparent 35%),
+        radial-gradient(circle at top, rgba(255,255,255,.06), transparent 34%),
         linear-gradient(180deg, #161c2a, #0f131c);
       overflow:hidden;
       touch-action:none;
     }
 
     .grid-lines{
-      position:absolute; inset:0; pointer-events:none; opacity:.42;
+      position:absolute; inset:0;
+      pointer-events:none;
+      opacity:.42;
       background-image:
         linear-gradient(rgba(255,255,255,.06) 1px, transparent 1px),
         linear-gradient(90deg, rgba(255,255,255,.06) 1px, transparent 1px);
@@ -140,18 +145,23 @@
       display:flex;
       align-items:center;
       justify-content:center;
-      will-change:transform,left,top;
+      will-change:transform,left,top,opacity;
+    }
+
+    .cell.fall-in{
+      animation:fallIn .38s cubic-bezier(.18,.82,.22,1) both;
+      animation-delay:var(--delay, 0ms);
     }
 
     .capsule{
       width:86%;
-      height:62%;
+      height:64%;
       border-radius:999px;
       position:relative;
       overflow:hidden;
       border:1px solid rgba(255,255,255,.16);
       box-shadow:
-        inset 0 5px 10px rgba(255,255,255,.13),
+        inset 0 5px 10px rgba(255,255,255,.14),
         inset 0 -10px 16px rgba(0,0,0,.22),
         0 8px 14px rgba(0,0,0,.28);
       transform:translateZ(0);
@@ -160,33 +170,66 @@
     .capsule::before{
       content:'';
       position:absolute;
-      left:12%; top:16%;
+      left:12%; top:15%;
       width:28%; height:24%;
       border-radius:999px;
       background:rgba(255,255,255,.42);
       filter:blur(1px);
       opacity:.72;
+      pointer-events:none;
     }
 
     .capsule::after{
       content:'';
-      position:absolute; inset:0;
+      position:absolute;
+      inset:0;
       border-radius:999px;
-      background:linear-gradient(90deg, rgba(255,255,255,.18), transparent 28%, transparent 72%, rgba(255,255,255,.12));
-      opacity:.92;
-      mix-blend-mode:screen;
       pointer-events:none;
     }
 
-    .capsule.normal{animation:gentle-breathe 1.9s ease-in-out infinite alternate;}
+    .capsule::marker{content:''}
+
+    .capsule.normal{
+      animation:gentle-breathe 1.9s ease-in-out infinite alternate;
+      background:linear-gradient(180deg, var(--pill-top), var(--pill-bottom));
+    }
+
+    .capsule.normal::after{
+      background:
+        linear-gradient(90deg,
+          rgba(255,255,255,.18), transparent 26%,
+          rgba(255,255,255,.46) 47%,
+          rgba(255,255,255,.78) 50%,
+          rgba(255,255,255,.46) 53%,
+          transparent 74%, rgba(255,255,255,.12));
+      opacity:.92;
+      mix-blend-mode:screen;
+    }
+
     .capsule.rainbow{
-      animation:rainbow-shift 1.15s linear infinite, gentle-breathe 1.7s ease-in-out infinite alternate;
-      background:linear-gradient(90deg, #ff4d4d, #ffb347, #fff06b, #62ff7a, #58d8ff, #8b62ff, #ff62d9);
+      animation:rainbow-shift 1.1s linear infinite, gentle-breathe 1.8s ease-in-out infinite alternate;
+      background:linear-gradient(90deg, #ff4d4d, #ffb347, #fff16a, #57ff74, #4fd8ff, #8b62ff, #ff68da);
       background-size:280% 100%;
     }
-    .capsule.black{background:linear-gradient(180deg, #313131, #040404);}
+
+    .capsule.rainbow::after{
+      background:
+        linear-gradient(90deg,
+          rgba(255,255,255,.18), transparent 26%,
+          rgba(255,255,255,.52) 47%,
+          rgba(255,255,255,.9) 50%,
+          rgba(255,255,255,.52) 53%,
+          transparent 74%, rgba(255,255,255,.15));
+      opacity:.95;
+      mix-blend-mode:screen;
+    }
+
+    .capsule.black{
+      background:linear-gradient(180deg, #313131, #040404);
+    }
+
     .capsule.fizz{
-      background:linear-gradient(180deg, #ebffff, #7ff9ff);
+      background:linear-gradient(180deg, #f3ffff, #77f8ff);
       animation:fizz-pulse .9s ease-in-out infinite alternate;
       box-shadow:
         inset 0 5px 10px rgba(255,255,255,.22),
@@ -195,85 +238,70 @@
         0 8px 14px rgba(0,0,0,.28);
     }
 
-    .badge-active{
+    .capsule.fizz::after{
+      background:
+        linear-gradient(90deg,
+          rgba(255,255,255,.18), transparent 26%,
+          rgba(255,255,255,.58) 47%,
+          rgba(255,255,255,.92) 50%,
+          rgba(255,255,255,.58) 53%,
+          transparent 74%, rgba(255,255,255,.12));
+      opacity:.95;
+      mix-blend-mode:screen;
+    }
+
+    .stripe{
       position:absolute;
-      inset:18% 28%;
+      left:50%; top:9%;
+      width:9%; height:82%;
+      transform:translateX(-50%);
       border-radius:999px;
-      background:rgba(255,255,255,.14);
-      box-shadow:0 0 10px rgba(255,255,255,.12) inset;
+      background:rgba(255,255,255,.66);
+      box-shadow:0 0 8px rgba(255,255,255,.22);
       pointer-events:none;
     }
 
-    .selected .capsule{filter:drop-shadow(0 0 14px rgba(125, 220, 255, .78));}
+    .selected .capsule{filter:drop-shadow(0 0 14px rgba(125,220,255,.78));}
     .target .capsule{
-      outline:2px dashed rgba(255,255,255,.55);
+      outline:2px dashed rgba(255,255,255,.56);
       outline-offset:-5px;
-      background-clip:padding-box;
     }
-
-    #side{
-      min-width:0;
-      display:flex;
-      flex-direction:column;
-      gap:12px;
-    }
-
-    .panel{
-      border-radius:22px;
-      background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
-      border:1px solid var(--line);
-      box-shadow:var(--shadow);
-      padding:12px;
-    }
-
-    .shop-grid{
-      display:grid;
-      grid-template-columns:repeat(2, minmax(0,1fr));
-      gap:10px;
-    }
-
-    .shop-btn{
-      border:none;
-      border-radius:18px;
-      min-height:74px;
-      padding:10px 8px;
-      background:linear-gradient(180deg, rgba(255,255,255,.11), rgba(255,255,255,.05));
-      color:var(--text);
-      box-shadow:0 8px 18px rgba(0,0,0,.20);
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-      gap:6px;
-      font-weight:900;
-    }
-
-    .shop-btn .ico{font-size:24px;line-height:1}
-    .shop-btn .price{font-size:13px;color:#dfe7ff;opacity:.92}
-    .shop-btn.glove .ico{filter:drop-shadow(0 0 8px rgba(90,170,255,.34));}
-    .shop-btn.bomb .ico{filter:drop-shadow(0 0 8px rgba(255,140,80,.32));}
-    .shop-btn.shuffle .ico{filter:drop-shadow(0 0 8px rgba(255,255,255,.22));}
-
-    .mini-title{display:none}
-    .panel.shop{padding:12px}
-    .panel.shop .shop-grid{margin-top:0}
-
-    .active-tool{
-      box-shadow:0 0 0 1px rgba(120,220,255,.25), 0 0 20px rgba(120,220,255,.18), 0 8px 18px rgba(0,0,0,.22) !important;
-    }
+    .source .capsule{filter:drop-shadow(0 0 12px rgba(255,255,255,.62));}
 
     canvas#fx{
-      position:absolute; inset:0;
+      position:absolute;
+      inset:0;
       pointer-events:none;
+    }
+
+    .bonus-btn{
+      flex:1 1 110px;
+      min-width:110px;
+      flex-direction:column;
+      gap:4px;
+      padding:10px 8px;
+    }
+
+    .bonus-btn .ico{font-size:23px;line-height:1}
+    .bonus-btn .price{font-size:13px;opacity:.94}
+
+    .bonus-btn.active-tool{
+      box-shadow:0 0 0 1px rgba(130,230,255,.22), 0 0 18px rgba(120,220,255,.18), 0 8px 18px rgba(0,0,0,.22) !important;
+    }
+
+    .bonus-btn:disabled{
+      opacity:.42;
+      filter:saturate(.6);
     }
 
     #toast{
       position:fixed;
-      left:50%; bottom:16px;
+      left:50%;
+      bottom:16px;
       transform:translateX(-50%) translateY(8px);
       padding:10px 14px;
       border-radius:14px;
-      background:rgba(12, 16, 24, .92);
+      background:rgba(12,16,24,.92);
       border:1px solid rgba(255,255,255,.09);
       box-shadow:0 14px 30px rgba(0,0,0,.28);
       opacity:0;
@@ -285,37 +313,27 @@
     }
     #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
-    @keyframes gentle-breathe{
-      from{transform:scale(1)}
-      to{transform:scale(1.03)}
-    }
-    @keyframes rainbow-shift{
-      from{background-position:0% 50%}
-      to{background-position:100% 50%}
-    }
-    @keyframes fizz-pulse{
-      from{transform:scale(.98)}
-      to{transform:scale(1.03)}
+    @keyframes gentle-breathe{from{transform:scale(1)}to{transform:scale(1.03)}}
+    @keyframes rainbow-shift{from{background-position:0% 50%}to{background-position:100% 50%}}
+    @keyframes fizz-pulse{from{transform:scale(.98)}to{transform:scale(1.03)}}
+    @keyframes fallIn{
+      from{transform:translate(-50%,-50%) translateY(-42px);opacity:0.15}
+      60%{opacity:1}
+      to{transform:translate(-50%,-50%) translateY(0);opacity:1}
     }
 
     @media (max-width: 920px){
-      #app{
-        grid-template-columns:1fr;
-        grid-template-rows:auto auto minmax(0,1fr);
-      }
-      #side{flex-direction:row;overflow:auto;padding-bottom:2px}
-      #side .panel{min-width:220px;flex:0 0 auto}
       #board-shell{width:min(96vw, 82vh)}
-      .shop-grid{grid-template-columns:repeat(2, minmax(0,1fr))}
-      .stat{min-width:unset; padding:8px 10px}
+      .stat{min-width:unset;padding:8px 10px}
+      .bonus-btn{flex-basis:calc(50% - 10px);min-width:calc(50% - 10px)}
     }
 
     @media (max-width: 520px){
-      .topbar{gap:8px}
-      .icon-btn,.mode-btn{padding:10px 10px;border-radius:16px}
-      .stat{padding:8px 10px;border-radius:14px}
+      #app{gap:10px;padding:10px}
+      .topbar,.bottombar{gap:8px;padding:8px;border-radius:20px}
+      .icon-btn,.mode-btn,.pause-btn,.bonus-btn{border-radius:16px}
       #board-shell{width:min(96vw, 80vh);padding:10px;border-radius:24px}
-      .shop-btn{min-height:68px;padding:8px 6px}
+      .bonus-btn{flex-basis:calc(50% - 8px);min-width:calc(50% - 8px);padding:9px 6px}
     }
   </style>
 </head>
@@ -323,13 +341,13 @@
 <div id="app">
   <div class="topbar">
     <button id="modeBtn" class="mode-btn" aria-label="Mode">⏱</button>
+    <button id="pauseBtn" class="pause-btn" aria-label="Pause">⏸</button>
     <button id="shuffleBtn" class="icon-btn" aria-label="Shuffle">🔀</button>
-    <button id="buyShuffleBtn" class="icon-btn" aria-label="Buy shuffle">➕🔀</button>
     <div class="stat" aria-label="Score"><span class="ico">⭐</span><span class="num" id="score">0</span></div>
     <div class="stat" aria-label="Coins"><span class="ico">🪙</span><span class="num" id="coins">0</span></div>
     <div class="stat" aria-label="Moves"><span class="ico">👣</span><span class="num" id="moves">0</span></div>
     <div class="stat" aria-label="Shuffles"><span class="ico">🔁</span><span class="num" id="shuffles">0</span></div>
-    <div class="stat" id="timeBox" aria-label="Time"><span class="ico">⏳</span><span class="num" id="timeLeft">120</span></div>
+    <div class="stat" id="timeBox" aria-label="Time"><span class="ico">⏳</span><span class="num" id="timeLeft">180</span></div>
   </div>
 
   <div id="board-wrap">
@@ -339,19 +357,23 @@
     </div>
   </div>
 
-  <div id="side">
-    <div class="panel shop">
-      <div class="shop-grid">
-        <button id="gloveBtn" class="shop-btn glove" aria-label="Glove">
-          <div class="ico">🧤</div>
-          <div class="price">15</div>
-        </button>
-        <button id="bombBtn" class="shop-btn bomb" aria-label="Bomb">
-          <div class="ico">💣</div>
-          <div class="price">35</div>
-        </button>
-      </div>
-    </div>
+  <div class="bottombar" id="bonusBar">
+    <button id="gloveBtn" class="bonus-btn" aria-label="Glove">
+      <div class="ico">🧤</div>
+      <div class="price">15</div>
+    </button>
+    <button id="bombBtn" class="bonus-btn" aria-label="Bomb">
+      <div class="ico">💣</div>
+      <div class="price">35</div>
+    </button>
+    <button id="timeBtn" class="bonus-btn" aria-label="Plus time">
+      <div class="ico">⏱➕</div>
+      <div class="price">45</div>
+    </button>
+    <button id="syringeBtn" class="bonus-btn" aria-label="Syringe">
+      <div class="ico">💉</div>
+      <div class="price">40</div>
+    </button>
   </div>
 </div>
 
@@ -361,11 +383,10 @@
 (() => {
   const ROWS = 8;
   const COLS = 8;
-  const COLORS = ['#ff5f60','#4eb8ff','#6ef06f','#ffc94a','#b564ff','#ff72dd'];
+  const COLORS = ['#ff5f60', '#4eb8ff', '#6ef06f', '#ffc94a', '#b564ff', '#ff72dd'];
   const RAINBOW = 'rainbow';
   const BLACK = 'black';
   const FIZZ = 'fizz';
-  const PURPLE = 'purple';
 
   const board = document.getElementById('board');
   const shell = document.getElementById('board-shell');
@@ -380,38 +401,43 @@
   const timeBox = document.getElementById('timeBox');
 
   const modeBtn = document.getElementById('modeBtn');
+  const pauseBtn = document.getElementById('pauseBtn');
   const shuffleBtn = document.getElementById('shuffleBtn');
-  const buyShuffleBtn = document.getElementById('buyShuffleBtn');
   const gloveBtn = document.getElementById('gloveBtn');
   const bombBtn = document.getElementById('bombBtn');
+  const timeBtn = document.getElementById('timeBtn');
+  const syringeBtn = document.getElementById('syringeBtn');
   const toast = document.getElementById('toast');
+  const bonusBar = document.getElementById('bonusBar');
 
   let grid = [];
   let score = 0;
   let coins = 0;
   let moves = 1;
-  let shuffles = 1;
+  let shuffles = 0;
   let mode = 'time';
-  let timeLeft = 120;
+  let paused = false;
+  let timeLeft = 180;
   let timer = null;
-  let activeTool = null;
+  let activeTool = null; // glove | bomb | syringe
+  let syringeSourceColor = null;
   let selected = null;
-  let pointerDown = false;
   let dragStart = null;
+  let pointerDown = false;
+  let boardLocked = false;
   let cellSize = 0;
   let boardW = 0;
   let boardH = 0;
   let particles = [];
   let scoreMilestone = 0;
-  let boardLocked = false;
-  let hoverTarget = null;
+  let fallMap = new Map();
 
   function rand(arr){ return arr[(Math.random() * arr.length) | 0]; }
   function toastMsg(text){
     toast.textContent = text;
     toast.classList.add('show');
     clearTimeout(toast._t);
-    toast._t = setTimeout(() => toast.classList.remove('show'), 1200);
+    toast._t = setTimeout(() => toast.classList.remove('show'), 1100);
   }
 
   function resize(){
@@ -449,6 +475,19 @@
     return false;
   }
 
+  function buildGrid(){
+    grid = Array.from({ length: ROWS }, () => Array.from({ length: COLS }, () => null));
+    for (let r = 0; r < ROWS; r++){
+      for (let c = 0; c < COLS; c++){
+        let item;
+        do {
+          item = makeItem();
+          grid[r][c] = item;
+        } while (immediateMatchAt(r, c));
+      }
+    }
+  }
+
   function immediateMatchAt(r, c){
     const item = grid[r][c];
     if (!item || item.type !== 'color') return false;
@@ -463,38 +502,52 @@
     return count >= 3;
   }
 
-  function buildGrid(){
-    grid = Array.from({ length: ROWS }, () => Array.from({ length: COLS }, () => null));
+  function randomizeBoardPreserveState(){
+    const items = [];
+    for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) items.push(grid[r][c]);
+    for (let i = items.length - 1; i > 0; i--){
+      const j = (Math.random() * (i + 1)) | 0;
+      [items[i], items[j]] = [items[j], items[i]];
+    }
+    let k = 0;
+    for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) grid[r][c] = items[k++];
+
+    let guard = 0;
+    while (collectMatches().length && guard++ < 6){
+      for (let i = items.length - 1; i > 0; i--){
+        const j = (Math.random() * (i + 1)) | 0;
+        [items[i], items[j]] = [items[j], items[i]];
+      }
+      k = 0;
+      for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) grid[r][c] = items[k++];
+    }
+    markAllAsFalling();
+    render();
+  }
+
+  function markAllAsFalling(){
+    fallMap.clear();
     for (let r = 0; r < ROWS; r++){
       for (let c = 0; c < COLS; c++){
-        let item;
-        do {
-          item = makeItem();
-          grid[r][c] = item;
-        } while (immediateMatchAt(r, c));
+        fallMap.set(`${r},${c}`, r);
       }
     }
+    setTimeout(() => fallMap.clear(), 420);
   }
 
-  function cellCenter(r, c){
-    return { x: c * cellSize + cellSize / 2, y: r * cellSize + cellSize / 2 };
-  }
-
-  function getCellFromPoint(x, y){
+  function getItem(r, c){ return grid[r]?.[c] ?? null; }
+  function swap(a, b){ const t = grid[a.r][a.c]; grid[a.r][a.c] = grid[b.r][b.c]; grid[b.r][b.c] = t; }
+  function adjacent(a, b){ return Math.abs(a.r - b.r) + Math.abs(a.c - b.c) === 1; }
+  function cellCenter(r, c){ return { x: c * cellSize + cellSize / 2, y: r * cellSize + cellSize / 2 }; }
+  function cellFromPoint(x, y){
     const c = Math.floor(x / cellSize);
     const r = Math.floor(y / cellSize);
     if (r < 0 || c < 0 || r >= ROWS || c >= COLS) return null;
     return { r, c };
   }
 
-  function getItem(r, c){ return grid[r]?.[c] ?? null; }
-  function setItem(r, c, item){ grid[r][c] = item; }
-  function swap(a, b){ const t = grid[a.r][a.c]; grid[a.r][a.c] = grid[b.r][b.c]; grid[b.r][b.c] = t; }
-  function isAdjacent(a, b){ return Math.abs(a.r - b.r) + Math.abs(a.c - b.c) === 1; }
-
   function render(){
     board.innerHTML = '';
-
     const gridLines = document.createElement('div');
     gridLines.className = 'grid-lines';
     board.appendChild(gridLines);
@@ -506,7 +559,13 @@
 
         const cell = document.createElement('div');
         cell.className = 'cell';
+        const key = `${r},${c}`;
+        if (fallMap.has(key)){
+          cell.classList.add('fall-in');
+          cell.style.setProperty('--delay', `${Math.min(fallMap.get(key) * 28, 220)}ms`);
+        }
         if (selected && selected.r === r && selected.c === c) cell.classList.add('selected');
+        if (syringeSourceColor && syringeSourcePos && syringeSourcePos.r === r && syringeSourcePos.c === c) cell.classList.add('source');
         if (hoverTarget && hoverTarget.r === r && hoverTarget.c === c) cell.classList.add('target');
 
         cell.style.left = (c * cellSize + cellSize / 2) + 'px';
@@ -518,20 +577,27 @@
         capsule.className = 'capsule';
         if (item.type === 'color'){
           capsule.classList.add('normal');
-          capsule.style.background = `linear-gradient(180deg, color-mix(in srgb, ${item.color} 78%, white 22%), ${item.color})`;
+          capsule.style.setProperty('--pill-top', item.color);
+          capsule.style.setProperty('--pill-bottom', shadeColor(item.color, -20));
         } else if (item.type === RAINBOW){
           capsule.classList.add('rainbow');
         } else if (item.type === BLACK){
           capsule.classList.add('black');
         } else if (item.type === FIZZ){
           capsule.classList.add('fizz');
-          capsule.style.background = 'linear-gradient(180deg, #efffff, #77f8ff)';
         }
+
+        const stripe = document.createElement('div');
+        stripe.className = 'stripe';
+        capsule.appendChild(stripe);
 
         if (item.type === BLACK && item.active){
           const glow = document.createElement('div');
-          glow.className = 'badge-active';
-          cell.appendChild(glow);
+          glow.className = 'stripe';
+          glow.style.width = '15%';
+          glow.style.opacity = '.88';
+          glow.style.background = 'rgba(255,255,255,.38)';
+          capsule.appendChild(glow);
         }
 
         cell.appendChild(capsule);
@@ -540,14 +606,21 @@
     }
   }
 
-  function burst(x, y, kind = 'normal', count = 16){
-    const palette = kind === 'fizz'
-      ? ['#ffffff', '#d8ffff', '#a8f7ff']
-      : ['#ffffff', '#eff4ff', '#a8c5ff'];
+  function shadeColor(hex, amount){
+    const raw = hex.replace('#', '');
+    const num = parseInt(raw, 16);
+    const r = Math.max(0, Math.min(255, (num >> 16) + amount));
+    const g = Math.max(0, Math.min(255, ((num >> 8) & 0xff) + amount));
+    const b = Math.max(0, Math.min(255, (num & 0xff) + amount));
+    return `rgb(${r}, ${g}, ${b})`;
+  }
 
+  function burst(x, y, kind = 'normal', count = 16){
+    const palette = kind === 'fizz' ? ['#ffffff', '#dbffff', '#a8f7ff'] : ['#ffffff', '#eff4ff', '#a8c5ff'];
     for (let i = 0; i < count; i++){
       particles.push({
-        x, y,
+        x,
+        y,
         vx: (Math.random() * 2 - 1) * (kind === 'fizz' ? 4.2 : 3.0),
         vy: (Math.random() * 2 - 1) * (kind === 'fizz' ? 4.2 : 3.0),
         life: 34 + Math.random() * 14,
@@ -575,10 +648,11 @@
     requestAnimationFrame(fxLoop);
   }
 
-  function addScore(amount){
-    score += amount;
+  function addScore(points){
+    score += points;
     scoreEl.textContent = score;
 
+    if (mode !== 'time') return;
     const milestone = Math.floor(score / 1500);
     while (milestone > scoreMilestone){
       scoreMilestone += 1;
@@ -586,24 +660,31 @@
       coins += 10;
       shufflesEl.textContent = shuffles;
       coinsEl.textContent = coins;
-      toastMsg('+1 🔀  +10 🪙');
+      toastMsg('➕🔀➕🪙');
     }
   }
 
   function refill(){
+    fallMap.clear();
     for (let c = 0; c < COLS; c++){
       let empty = 0;
       for (let r = ROWS - 1; r >= 0; r--){
-        if (!grid[r][c]) empty++;
-        else if (empty > 0){
+        if (!grid[r][c]){
+          empty++;
+        } else if (empty > 0){
           grid[r + empty][c] = grid[r][c];
           grid[r][c] = null;
+          fallMap.set(`${r + empty},${c}`, empty);
         }
       }
       for (let r = 0; r < ROWS; r++){
-        if (!grid[r][c]) grid[r][c] = makeItem();
+        if (!grid[r][c]){
+          grid[r][c] = makeItem();
+          fallMap.set(`${r},${c}`, ROWS - r);
+        }
       }
     }
+    setTimeout(() => fallMap.clear(), 420);
   }
 
   function collectMatches(){
@@ -616,7 +697,6 @@
         const base = grid[r][c];
         if (!base){ c++; continue; }
         if (base.type === BLACK){ c++; continue; }
-
         const color = base.type === 'color' ? base.color : null;
         c++;
         while (c < COLS && grid[r][c] && (matchesColor(grid[r][c], color) || grid[r][c].type === BLACK)) c++;
@@ -631,7 +711,6 @@
         const base = grid[r][c];
         if (!base){ r++; continue; }
         if (base.type === BLACK){ r++; continue; }
-
         const color = base.type === 'color' ? base.color : null;
         r++;
         while (r < ROWS && grid[r][c] && (matchesColor(grid[r][c], color) || grid[r][c].type === BLACK)) r++;
@@ -663,12 +742,13 @@
               x.item.active = true;
               keep.add(`${x.r},${x.c}`);
               const p = cellCenter(x.r, x.c);
-              burst(p.x, p.y, 'normal', 12);
+              burst(p.x, p.y, 'normal', 10);
             }
           }
         }
       }
 
+      let cleared = 0;
       for (const group of groups){
         for (const x of group.items){
           const key = `${x.r},${x.c}`;
@@ -678,11 +758,12 @@
           const p = cellCenter(x.r, x.c);
           burst(p.x, p.y, item.type === FIZZ ? 'fizz' : 'normal', item.type === FIZZ ? 18 : 12);
           grid[x.r][x.c] = null;
+          cleared += 1;
         }
       }
 
       refill();
-      addScore(100 * groups.reduce((sum, g) => sum + g.items.length, 0));
+      addScore(100 * cleared);
     }
 
     if (didSomething){
@@ -700,9 +781,9 @@
           const b = { r: r + d.r, c: c + d.c };
           if (b.r >= ROWS || b.c >= COLS) continue;
           swap(a, b);
-          const found = collectMatches().length > 0;
+          const ok = collectMatches().length > 0;
           swap(a, b);
-          if (found) return true;
+          if (ok) return true;
         }
       }
     }
@@ -710,18 +791,17 @@
   }
 
   function shuffleBoard(){
+    if (mode !== 'time') return toastMsg('⛔');
     if (shuffles <= 0 || boardLocked) return toastMsg('⛔');
     shuffles -= 1;
     shufflesEl.textContent = shuffles;
 
     const items = [];
     for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) items.push(grid[r][c]);
-
     for (let i = items.length - 1; i > 0; i--){
       const j = (Math.random() * (i + 1)) | 0;
       [items[i], items[j]] = [items[j], items[i]];
     }
-
     let k = 0;
     for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) grid[r][c] = items[k++];
 
@@ -730,15 +810,10 @@
     render();
   }
 
-  function grantFallbackMove(){
-    if (moves <= 0) moves = 1;
-    movesEl.textContent = moves;
-  }
-
   function spendMove(){
     if (moves <= 0){
       moves = 1;
-      toastMsg('👣1');
+      toastMsg('👣+1');
     } else {
       moves -= 1;
     }
@@ -763,41 +838,46 @@
         grid[p.r][p.c] = null;
       }
     }
-
     refill();
     addScore(300);
     render();
     return true;
   }
 
-  function clearTool(){
+  function activateToolState(tool, payload = null){
+    activeTool = tool;
+    syringeSourceColor = payload?.color ?? null;
+    syringeSourcePos = payload?.pos ?? null;
+    gloveBtn.classList.toggle('active-tool', tool === 'glove');
+    bombBtn.classList.toggle('active-tool', tool === 'bomb');
+    syringeBtn.classList.toggle('active-tool', tool === 'syringe');
+    document.body.style.cursor = tool ? 'crosshair' : 'default';
+  }
+
+  function clearToolState(){
     activeTool = null;
+    syringeSourceColor = null;
+    syringeSourcePos = null;
     hoverTarget = null;
     gloveBtn.classList.remove('active-tool');
     bombBtn.classList.remove('active-tool');
+    syringeBtn.classList.remove('active-tool');
     document.body.style.cursor = 'default';
   }
 
-  function activateTool(tool){
-    activeTool = tool;
-    hoverTarget = null;
-    gloveBtn.classList.toggle('active-tool', tool === 'glove');
-    bombBtn.classList.toggle('active-tool', tool === 'bomb');
-    document.body.style.cursor = 'crosshair';
-  }
-
   function buyTool(tool){
-    if (tool === 'glove' && coins < 15) return toastMsg('⛔');
-    if (tool === 'bomb' && coins < 35) return toastMsg('⛔');
-
-    if (tool === 'glove') coins -= 15;
-    if (tool === 'bomb') coins -= 35;
+    if (mode !== 'time') return toastMsg('⛔');
+    const cost = tool === 'glove' ? 15 : tool === 'bomb' ? 35 : tool === 'time' ? 45 : 40;
+    if (coins < cost) return toastMsg('⛔');
+    coins -= cost;
     coinsEl.textContent = coins;
-    activateTool(tool);
+    activateToolState(tool);
+    toastMsg(tool === 'glove' ? '🧤' : tool === 'bomb' ? '💣' : tool === 'time' ? '⏱➕' : '💉');
   }
 
   function applyToolAt(r, c){
     if (!activeTool) return false;
+    if (mode !== 'time') return false;
     const item = getItem(r, c);
     if (!item) return false;
 
@@ -808,7 +888,7 @@
       refill();
       addScore(40);
       render();
-      clearTool();
+      clearToolState();
       resolveBoard();
       return true;
     }
@@ -830,11 +910,40 @@
           grid[p.r][p.c] = null;
         }
       }
-
       refill();
       addScore(180);
       render();
-      clearTool();
+      clearToolState();
+      resolveBoard();
+      return true;
+    }
+
+    if (activeTool === 'time'){
+      if (coins < 45) return toastMsg('⛔');
+      coins -= 45;
+      coinsEl.textContent = coins;
+      timeLeft = Math.min(999, timeLeft + 50);
+      timeLeftEl.textContent = timeLeft;
+      toastMsg('⏳+50');
+      return true;
+    }
+
+    if (activeTool === 'syringe'){
+      if (!syringeSourceColor){
+        if (item.type !== 'color') return false;
+        syringeSourceColor = item.color;
+        syringeSourcePos = { r, c };
+        render();
+        return true;
+      }
+      if (syringeSourcePos && syringeSourcePos.r === r && syringeSourcePos.c === c) return true;
+      if (item.type === BLACK || item.type === FIZZ) return false;
+      grid[r][c] = { type: 'color', color: syringeSourceColor, active: true };
+      const p = cellCenter(r, c);
+      burst(p.x, p.y, 'normal', 12);
+      addScore(60);
+      render();
+      clearToolState();
       resolveBoard();
       return true;
     }
@@ -843,11 +952,9 @@
   }
 
   function trySwap(a, b){
-    if (!a || !b || !isAdjacent(a, b) || boardLocked) return false;
-
+    if (!a || !b || !adjacent(a, b) || boardLocked || paused) return false;
     swap(a, b);
     render();
-
     const found = collectMatches().length > 0;
     if (found){
       spendMove();
@@ -855,7 +962,6 @@
       ensurePlayable();
       return true;
     }
-
     swap(a, b);
     render();
     toastMsg('⟲');
@@ -863,13 +969,13 @@
   }
 
   function ensurePlayable(){
+    if (mode !== 'time') return;
     let guard = 0;
-    while (!hasMoves() && guard < 8){
-      guard++;
-      if (shuffles > 0){
-        shuffleBoard();
-      } else {
-        grantFallbackMove();
+    while (!hasMoves() && guard++ < 8){
+      if (shuffles > 0) shuffleBoard();
+      else {
+        if (moves <= 0) moves = 1;
+        movesEl.textContent = moves;
         break;
       }
     }
@@ -878,22 +984,52 @@
   function startTimer(){
     if (timer) clearInterval(timer);
     timer = setInterval(() => {
-      if (mode !== 'time') return;
+      if (mode !== 'time' || paused) return;
       if (timeLeft > 0){
         timeLeft -= 1;
         timeLeftEl.textContent = timeLeft;
-      } else {
-        clearInterval(timer);
-        timer = null;
       }
     }, 1000);
   }
 
   function setMode(next){
+    if (next === mode) return;
     mode = next;
     modeBtn.classList.toggle('active', mode === 'time');
+    modeBtn.textContent = mode === 'time' ? '⏱' : '♾';
     timeBox.style.display = mode === 'time' ? '' : 'none';
-    if (mode === 'time' && !timer) startTimer();
+
+    if (mode === 'time'){
+      timeLeft = 180;
+      timeLeftEl.textContent = timeLeft;
+      paused = false;
+      pauseBtn.textContent = '⏸';
+      pauseBtn.classList.remove('active');
+      randomizeBoardPreserveState();
+      updateBonusAvailability();
+      startTimer();
+    } else {
+      paused = false;
+      pauseBtn.textContent = '⏸';
+      pauseBtn.classList.remove('active');
+      updateBonusAvailability();
+      render();
+    }
+  }
+
+  function togglePause(){
+    paused = !paused;
+    pauseBtn.textContent = paused ? '▶' : '⏸';
+    pauseBtn.classList.toggle('active', paused);
+  }
+
+  function updateBonusAvailability(){
+    const enabled = mode === 'time' && !paused;
+    gloveBtn.disabled = !enabled;
+    bombBtn.disabled = !enabled;
+    timeBtn.disabled = !enabled;
+    syringeBtn.disabled = !enabled;
+    shuffleBtn.disabled = !enabled || shuffles <= 0;
   }
 
   function init(){
@@ -903,26 +1039,44 @@
     movesEl.textContent = moves;
     shufflesEl.textContent = shuffles;
     timeLeftEl.textContent = timeLeft;
-    setMode('time');
+    modeBtn.textContent = '⏱';
+    modeBtn.classList.add('active');
+    updateBonusAvailability();
     resize();
-    ensurePlayable();
+    markAllAsFalling();
     render();
     startTimer();
+    setInterval(() => {
+      updateBonusAvailability();
+      if (mode === 'time' && !paused && !boardLocked && !hasMoves()){
+        if (shuffles > 0) shuffleBoard();
+        else if (moves <= 0){
+          moves = 1;
+          movesEl.textContent = moves;
+        }
+      }
+    }, 1100);
     requestAnimationFrame(fxLoop);
   }
 
+  let hoverTarget = null;
+  let syringeSourcePos = null;
+
   board.addEventListener('pointerdown', (e) => {
-    if (boardLocked) return;
+    if (boardLocked || paused) return;
     const rect = board.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
-    const cell = getCellFromPoint(x, y);
+    const cell = cellFromPoint(x, y);
     if (!cell) return;
-
     pointerDown = true;
     dragStart = cell;
 
     if (activeTool){
+      if (activeTool === 'time'){
+        applyToolAt(cell.r, cell.c);
+        return;
+      }
       applyToolAt(cell.r, cell.c);
       return;
     }
@@ -938,13 +1092,12 @@
   });
 
   board.addEventListener('pointermove', (e) => {
-    if (!pointerDown || !dragStart || activeTool) return;
+    if (!pointerDown || !dragStart || activeTool || paused) return;
     const rect = board.getBoundingClientRect();
     const dx = e.clientX - rect.left - (dragStart.c * cellSize + cellSize / 2);
     const dy = e.clientY - rect.top - (dragStart.r * cellSize + cellSize / 2);
     const adx = Math.abs(dx), ady = Math.abs(dy);
     if (Math.max(adx, ady) < cellSize * 0.22) return;
-
     const dir = adx > ady ? { r: 0, c: dx > 0 ? 1 : -1 } : { r: dy > 0 ? 1 : -1, c: 0 };
     const target = { r: dragStart.r + dir.r, c: dragStart.c + dir.c };
     if (target.r < 0 || target.c < 0 || target.r >= ROWS || target.c >= COLS) return;
@@ -957,7 +1110,7 @@
     const rect = board.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
-    const cell = getCellFromPoint(x, y);
+    const cell = cellFromPoint(x, y);
     pointerDown = false;
 
     if (!cell){
@@ -965,6 +1118,8 @@
       render();
       return;
     }
+
+    if (paused) return;
 
     if (activeTool){
       applyToolAt(cell.r, cell.c);
@@ -982,7 +1137,7 @@
       return;
     }
 
-    if (selected && isAdjacent(selected, cell)){
+    if (selected && adjacent(selected, cell)){
       trySwap(selected, cell);
       selected = null;
     } else {
@@ -991,48 +1146,44 @@
     render();
   });
 
-  board.addEventListener('click', (e) => {
-    const rect = board.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const cell = getCellFromPoint(x, y);
-    if (!cell) return;
-    const item = getItem(cell.r, cell.c);
-    if (item && item.type === FIZZ) activateFizzAt(cell.r, cell.c);
-  });
-
-  modeBtn.addEventListener('click', () => setMode(mode === 'time' ? 'classic' : 'time'));
-  shuffleBtn.addEventListener('click', shuffleBoard);
-  buyShuffleBtn.addEventListener('click', () => {
-    if (coins < 10) return toastMsg('⛔');
-    coins -= 10;
-    shuffles += 1;
-    coinsEl.textContent = coins;
-    shufflesEl.textContent = shuffles;
-  });
+  modeBtn.addEventListener('click', () => setMode(mode === 'time' ? 'endless' : 'time'));
+  pauseBtn.addEventListener('click', () => togglePause());
+  shuffleBtn.addEventListener('click', () => shuffleBoard());
   gloveBtn.addEventListener('click', () => buyTool('glove'));
   bombBtn.addEventListener('click', () => buyTool('bomb'));
+  timeBtn.addEventListener('click', () => buyTool('time'));
+  syringeBtn.addEventListener('click', () => buyTool('syringe'));
 
-  document.addEventListener('pointerdown', (e) => {
-    if (!activeTool) return;
-    const rect = board.getBoundingClientRect();
-    if (e.clientX < rect.left || e.clientX > rect.right || e.clientY < rect.top || e.clientY > rect.bottom) return;
-  });
-
-  function ensureBlackActivationVisibility(){
-    // No-op retained for clarity: black pills visibly turn into colored pills on the board when part of a match.
-  }
-
-  function gameTick(){
-    if (mode === 'time' && timeLeft <= 0) return;
-    if (!hasMoves() && !boardLocked){
-      if (shuffles > 0) shuffleBoard();
-      else grantFallbackMove();
+  function activateFizzAt(r, c){
+    const item = getItem(r, c);
+    if (!item || item.type !== FIZZ) return false;
+    const horizontal = Math.random() < 0.5;
+    const list = [];
+    if (horizontal){
+      for (let x = 0; x < COLS; x++) list.push({ r, c: x });
+    } else {
+      for (let y = 0; y < ROWS; y++) list.push({ r: y, c });
     }
+    for (const p of list){
+      if (grid[p.r][p.c]){
+        const center = cellCenter(p.r, p.c);
+        burst(center.x, center.y, 'fizz', 10);
+        grid[p.r][p.c] = null;
+      }
+    }
+    refill();
+    addScore(300);
+    render();
+    resolveBoard();
+    return true;
   }
 
-  setInterval(gameTick, 1000);
+  function updateBonusBarLayout(){
+    bonusBar.style.justifyContent = 'center';
+  }
+
   init();
+  updateBonusBarLayout();
 })();
 </script>
 </body>
