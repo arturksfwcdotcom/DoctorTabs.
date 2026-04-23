@@ -31,6 +31,37 @@
 
     *{box-sizing:border-box;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}
 
+    #cookieNotice{
+      position:fixed;
+      left:12px;
+      right:12px;
+      top:12px;
+      z-index:50;
+      display:none;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:10px 12px;
+      border-radius:16px;
+      background:rgba(12,16,24,.96);
+      border:1px solid rgba(255,255,255,.12);
+      box-shadow:0 14px 30px rgba(0,0,0,.32);
+      color:#f5f8ff;
+      font-weight:800;
+    }
+    #cookieNotice .msg{display:flex;align-items:center;gap:8px;min-width:0}
+    #cookieNotice .msg span{opacity:.95}
+    #cookieNotice button{
+      border:none;
+      background:rgba(255,255,255,.08);
+      color:#fff;
+      width:38px;
+      height:38px;
+      border-radius:12px;
+      font-size:18px;
+      font-weight:900;
+    }
+
     #app{
       height:100%;
       display:grid;
@@ -130,7 +161,8 @@
     }
 
     .grid-lines{
-      position:absolute; inset:0;
+      position:absolute;
+      inset:0;
       pointer-events:none;
       opacity:.42;
       background-image:
@@ -149,7 +181,7 @@
     }
 
     .cell.fall-in{
-      animation:fallIn .38s cubic-bezier(.18,.82,.22,1) both;
+      animation:fallIn .8s cubic-bezier(.2,.86,.18,1) both;
       animation-delay:var(--delay, 0ms);
     }
 
@@ -170,8 +202,10 @@
     .capsule::before{
       content:'';
       position:absolute;
-      left:12%; top:15%;
-      width:28%; height:24%;
+      left:12%;
+      top:15%;
+      width:28%;
+      height:24%;
       border-radius:999px;
       background:rgba(255,255,255,.42);
       filter:blur(1px);
@@ -187,39 +221,34 @@
       pointer-events:none;
     }
 
-    .capsule::marker{content:''}
-
     .capsule.normal{
-      animation:gentle-breathe 1.9s ease-in-out infinite alternate;
       background:linear-gradient(180deg, var(--pill-top), var(--pill-bottom));
     }
 
     .capsule.normal::after{
-      background:
-        linear-gradient(90deg,
-          rgba(255,255,255,.18), transparent 26%,
-          rgba(255,255,255,.46) 47%,
-          rgba(255,255,255,.78) 50%,
-          rgba(255,255,255,.46) 53%,
-          transparent 74%, rgba(255,255,255,.12));
+      background:linear-gradient(90deg,
+        rgba(255,255,255,.18), transparent 26%,
+        rgba(255,255,255,.46) 47%,
+        rgba(255,255,255,.78) 50%,
+        rgba(255,255,255,.46) 53%,
+        transparent 74%, rgba(255,255,255,.12));
       opacity:.92;
       mix-blend-mode:screen;
     }
 
     .capsule.rainbow{
-      animation:rainbow-shift 1.1s linear infinite, gentle-breathe 1.8s ease-in-out infinite alternate;
+      animation:rainbow-shift 1.05s linear infinite;
       background:linear-gradient(90deg, #ff4d4d, #ffb347, #fff16a, #57ff74, #4fd8ff, #8b62ff, #ff68da);
       background-size:280% 100%;
     }
 
     .capsule.rainbow::after{
-      background:
-        linear-gradient(90deg,
-          rgba(255,255,255,.18), transparent 26%,
-          rgba(255,255,255,.52) 47%,
-          rgba(255,255,255,.9) 50%,
-          rgba(255,255,255,.52) 53%,
-          transparent 74%, rgba(255,255,255,.15));
+      background:linear-gradient(90deg,
+        rgba(255,255,255,.18), transparent 26%,
+        rgba(255,255,255,.52) 47%,
+        rgba(255,255,255,.9) 50%,
+        rgba(255,255,255,.52) 53%,
+        transparent 74%, rgba(255,255,255,.15));
       opacity:.95;
       mix-blend-mode:screen;
     }
@@ -230,7 +259,6 @@
 
     .capsule.fizz{
       background:linear-gradient(180deg, #f3ffff, #77f8ff);
-      animation:fizz-pulse .9s ease-in-out infinite alternate;
       box-shadow:
         inset 0 5px 10px rgba(255,255,255,.22),
         inset 0 -10px 16px rgba(0,0,0,.18),
@@ -239,21 +267,22 @@
     }
 
     .capsule.fizz::after{
-      background:
-        linear-gradient(90deg,
-          rgba(255,255,255,.18), transparent 26%,
-          rgba(255,255,255,.58) 47%,
-          rgba(255,255,255,.92) 50%,
-          rgba(255,255,255,.58) 53%,
-          transparent 74%, rgba(255,255,255,.12));
+      background:linear-gradient(90deg,
+        rgba(255,255,255,.18), transparent 26%,
+        rgba(255,255,255,.58) 47%,
+        rgba(255,255,255,.92) 50%,
+        rgba(255,255,255,.58) 53%,
+        transparent 74%, rgba(255,255,255,.12));
       opacity:.95;
       mix-blend-mode:screen;
     }
 
     .stripe{
       position:absolute;
-      left:50%; top:9%;
-      width:9%; height:82%;
+      left:50%;
+      top:9%;
+      width:9%;
+      height:82%;
       transform:translateX(-50%);
       border-radius:999px;
       background:rgba(255,255,255,.66);
@@ -313,11 +342,9 @@
     }
     #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
-    @keyframes gentle-breathe{from{transform:scale(1)}to{transform:scale(1.03)}}
     @keyframes rainbow-shift{from{background-position:0% 50%}to{background-position:100% 50%}}
-    @keyframes fizz-pulse{from{transform:scale(.98)}to{transform:scale(1.03)}}
     @keyframes fallIn{
-      from{transform:translate(-50%,-50%) translateY(-42px);opacity:0.15}
+      from{transform:translate(-50%,-50%) translateY(-120px);opacity:0.06}
       60%{opacity:1}
       to{transform:translate(-50%,-50%) translateY(0);opacity:1}
     }
@@ -338,6 +365,11 @@
   </style>
 </head>
 <body>
+<div id="cookieNotice">
+  <div class="msg"><span>🍪</span><span>This game uses cookies to save progress.</span></div>
+  <button id="cookieClose" aria-label="Close">✕</button>
+</div>
+
 <div id="app">
   <div class="topbar">
     <button id="modeBtn" class="mode-btn" aria-label="Mode">⏱</button>
@@ -388,6 +420,9 @@
   const BLACK = 'black';
   const FIZZ = 'fizz';
 
+  const COOKIE_KEY = 'match3_pills_progress_v2';
+  const COOKIE_NOTICE_KEY = 'match3_pills_cookie_notice_v1';
+
   const board = document.getElementById('board');
   const shell = document.getElementById('board-shell');
   const fx = document.getElementById('fx');
@@ -409,6 +444,8 @@
   const syringeBtn = document.getElementById('syringeBtn');
   const toast = document.getElementById('toast');
   const bonusBar = document.getElementById('bonusBar');
+  const cookieNotice = document.getElementById('cookieNotice');
+  const cookieClose = document.getElementById('cookieClose');
 
   let grid = [];
   let score = 0;
@@ -421,6 +458,7 @@
   let timer = null;
   let activeTool = null; // glove | bomb | syringe
   let syringeSourceColor = null;
+  let syringeSourcePos = null;
   let selected = null;
   let dragStart = null;
   let pointerDown = false;
@@ -431,6 +469,11 @@
   let particles = [];
   let scoreMilestone = 0;
   let fallMap = new Map();
+  let hoverTarget = null;
+  let saveTimer = null;
+  let showCookieBanner = getCookie(COOKIE_NOTICE_KEY) !== '1';
+  let storedEndlessGrid = null;
+  let suppressSave = false;
 
   function rand(arr){ return arr[(Math.random() * arr.length) | 0]; }
   function toastMsg(text){
@@ -438,6 +481,75 @@
     toast.classList.add('show');
     clearTimeout(toast._t);
     toast._t = setTimeout(() => toast.classList.remove('show'), 1100);
+  }
+
+  function setCookie(name, value, days = 365){
+    const expires = new Date(Date.now() + days * 864e5).toUTCString();
+    document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; SameSite=Lax`;
+  }
+
+  function getCookie(name){
+    const match = document.cookie.match(new RegExp('(?:^|; )' + name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '=([^;]*)'));
+    return match ? decodeURIComponent(match[1]) : '';
+  }
+
+  function cloneGrid(source){
+    return source.map(row => row.map(cell => cell ? ({ ...cell }) : null));
+  }
+
+  function serializeGrid(source){
+    return source.map(row => row.map(cell => cell ? { type: cell.type, color: cell.color, active: !!cell.active } : null));
+  }
+
+  function deserializeGrid(data){
+    return data.map(row => row.map(cell => cell ? ({ type: cell.type, color: cell.color, active: !!cell.active }) : null));
+  }
+
+  function scheduleSave(){
+    if (suppressSave) return;
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(saveGame, 120);
+  }
+
+  function saveGame(){
+    if (suppressSave) return;
+    const payload = {
+      grid: serializeGrid(grid),
+      score,
+      coins,
+      moves,
+      shuffles,
+      mode,
+      paused,
+      timeLeft,
+      scoreMilestone,
+      storedEndlessGrid: storedEndlessGrid ? serializeGrid(storedEndlessGrid) : null
+    };
+    try{
+      setCookie(COOKIE_KEY, btoa(unescape(encodeURIComponent(JSON.stringify(payload)))));
+    }catch(_e){}
+  }
+
+  function loadGame(){
+    const raw = getCookie(COOKIE_KEY);
+    if (!raw) return false;
+    try{
+      const json = decodeURIComponent(escape(atob(raw)));
+      const data = JSON.parse(json);
+      if (Array.isArray(data.grid)) grid = deserializeGrid(data.grid);
+      score = Number(data.score || 0);
+      coins = Number(data.coins || 0);
+      moves = Number(data.moves || 1);
+      shuffles = Number(data.shuffles || 0);
+      mode = data.mode === 'endless' ? 'endless' : 'time';
+      paused = !!data.paused;
+      timeLeft = Number(data.timeLeft || 180);
+      scoreMilestone = Number(data.scoreMilestone || 0);
+      storedEndlessGrid = Array.isArray(data.storedEndlessGrid) ? deserializeGrid(data.storedEndlessGrid) : null;
+      return true;
+    }catch(_e){
+      return false;
+    }
   }
 
   function resize(){
@@ -475,19 +587,6 @@
     return false;
   }
 
-  function buildGrid(){
-    grid = Array.from({ length: ROWS }, () => Array.from({ length: COLS }, () => null));
-    for (let r = 0; r < ROWS; r++){
-      for (let c = 0; c < COLS; c++){
-        let item;
-        do {
-          item = makeItem();
-          grid[r][c] = item;
-        } while (immediateMatchAt(r, c));
-      }
-    }
-  }
-
   function immediateMatchAt(r, c){
     const item = grid[r][c];
     if (!item || item.type !== 'color') return false;
@@ -500,6 +599,19 @@
     for (let dr = 1; r - dr >= 0 && grid[r - dr][c] && matchesColor(grid[r - dr][c], color); dr++) count++;
     for (let dr = 1; r + dr < ROWS && grid[r + dr][c] && matchesColor(grid[r + dr][c], color); dr++) count++;
     return count >= 3;
+  }
+
+  function buildGrid(){
+    grid = Array.from({ length: ROWS }, () => Array.from({ length: COLS }, () => null));
+    for (let r = 0; r < ROWS; r++){
+      for (let c = 0; c < COLS; c++){
+        let item;
+        do {
+          item = makeItem();
+          grid[r][c] = item;
+        } while (immediateMatchAt(r, c));
+      }
+    }
   }
 
   function randomizeBoardPreserveState(){
@@ -532,7 +644,7 @@
         fallMap.set(`${r},${c}`, r);
       }
     }
-    setTimeout(() => fallMap.clear(), 420);
+    setTimeout(() => fallMap.clear(), 900);
   }
 
   function getItem(r, c){ return grid[r]?.[c] ?? null; }
@@ -562,7 +674,7 @@
         const key = `${r},${c}`;
         if (fallMap.has(key)){
           cell.classList.add('fall-in');
-          cell.style.setProperty('--delay', `${Math.min(fallMap.get(key) * 28, 220)}ms`);
+          cell.style.setProperty('--delay', `${Math.min(fallMap.get(key) * 80, 560)}ms`);
         }
         if (selected && selected.r === r && selected.c === c) cell.classList.add('selected');
         if (syringeSourceColor && syringeSourcePos && syringeSourcePos.r === r && syringeSourcePos.c === c) cell.classList.add('source');
@@ -604,6 +716,8 @@
         board.appendChild(cell);
       }
     }
+
+    updateCookieBanner();
   }
 
   function shadeColor(hex, amount){
@@ -662,6 +776,7 @@
       coinsEl.textContent = coins;
       toastMsg('➕🔀➕🪙');
     }
+    scheduleSave();
   }
 
   function refill(){
@@ -674,17 +789,17 @@
         } else if (empty > 0){
           grid[r + empty][c] = grid[r][c];
           grid[r][c] = null;
-          fallMap.set(`${r + empty},${c}`, empty);
+          fallMap.set(`${r + empty},${c}`, r + empty);
         }
       }
       for (let r = 0; r < ROWS; r++){
         if (!grid[r][c]){
           grid[r][c] = makeItem();
-          fallMap.set(`${r},${c}`, ROWS - r);
+          fallMap.set(`${r},${c}`, r);
         }
       }
     }
-    setTimeout(() => fallMap.clear(), 420);
+    setTimeout(() => fallMap.clear(), 900);
   }
 
   function collectMatches(){
@@ -771,6 +886,7 @@
       ensurePlayable();
     }
     boardLocked = false;
+    scheduleSave();
   }
 
   function hasMoves(){
@@ -808,6 +924,7 @@
     resolveBoard();
     if (!hasMoves()) shuffleBoard();
     render();
+    scheduleSave();
   }
 
   function spendMove(){
@@ -818,6 +935,7 @@
       moves -= 1;
     }
     movesEl.textContent = moves;
+    scheduleSave();
   }
 
   function activateFizzAt(r, c){
@@ -830,7 +948,6 @@
     } else {
       for (let y = 0; y < ROWS; y++) list.push({ r: y, c });
     }
-
     for (const p of list){
       if (grid[p.r][p.c]){
         const center = cellCenter(p.r, p.c);
@@ -841,6 +958,8 @@
     refill();
     addScore(300);
     render();
+    resolveBoard();
+    scheduleSave();
     return true;
   }
 
@@ -867,12 +986,24 @@
 
   function buyTool(tool){
     if (mode !== 'time') return toastMsg('⛔');
-    const cost = tool === 'glove' ? 15 : tool === 'bomb' ? 35 : tool === 'time' ? 45 : 40;
+    if (tool === 'time'){
+      if (coins < 45) return toastMsg('⛔');
+      coins -= 45;
+      coinsEl.textContent = coins;
+      timeLeft = Math.min(999, timeLeft + 50);
+      timeLeftEl.textContent = timeLeft;
+      toastMsg('⏳+50');
+      scheduleSave();
+      return;
+    }
+
+    const cost = tool === 'glove' ? 15 : 35;
     if (coins < cost) return toastMsg('⛔');
     coins -= cost;
     coinsEl.textContent = coins;
     activateToolState(tool);
-    toastMsg(tool === 'glove' ? '🧤' : tool === 'bomb' ? '💣' : tool === 'time' ? '⏱➕' : '💉');
+    toastMsg(tool === 'glove' ? '🧤' : '💣');
+    scheduleSave();
   }
 
   function applyToolAt(r, c){
@@ -915,16 +1046,6 @@
       render();
       clearToolState();
       resolveBoard();
-      return true;
-    }
-
-    if (activeTool === 'time'){
-      if (coins < 45) return toastMsg('⛔');
-      coins -= 45;
-      coinsEl.textContent = coins;
-      timeLeft = Math.min(999, timeLeft + 50);
-      timeLeftEl.textContent = timeLeft;
-      toastMsg('⏳+50');
       return true;
     }
 
@@ -988,12 +1109,27 @@
       if (timeLeft > 0){
         timeLeft -= 1;
         timeLeftEl.textContent = timeLeft;
+        scheduleSave();
       }
     }, 1000);
   }
 
+  function updateCookieBanner(){
+    if (showCookieBanner) cookieNotice.style.display = 'flex';
+    else cookieNotice.style.display = 'none';
+  }
+
   function setMode(next){
     if (next === mode) return;
+
+    if (mode === 'endless' && next === 'time'){
+      storedEndlessGrid = cloneGrid(grid);
+    }
+
+    if (mode === 'time' && next === 'endless' && storedEndlessGrid){
+      grid = cloneGrid(storedEndlessGrid);
+    }
+
     mode = next;
     modeBtn.classList.toggle('active', mode === 'time');
     modeBtn.textContent = mode === 'time' ? '⏱' : '♾';
@@ -1015,12 +1151,14 @@
       updateBonusAvailability();
       render();
     }
+    scheduleSave();
   }
 
   function togglePause(){
     paused = !paused;
     pauseBtn.textContent = paused ? '▶' : '⏸';
     pauseBtn.classList.toggle('active', paused);
+    scheduleSave();
   }
 
   function updateBonusAvailability(){
@@ -1033,19 +1171,39 @@
   }
 
   function init(){
-    buildGrid();
+    const loaded = loadGame();
+    if (!loaded){
+      buildGrid();
+      score = 0;
+      coins = 0;
+      moves = 1;
+      shuffles = 0;
+      mode = 'time';
+      paused = false;
+      timeLeft = 180;
+      scoreMilestone = 0;
+      storedEndlessGrid = null;
+    }
+
     scoreEl.textContent = score;
     coinsEl.textContent = coins;
     movesEl.textContent = moves;
     shufflesEl.textContent = shuffles;
     timeLeftEl.textContent = timeLeft;
-    modeBtn.textContent = '⏱';
-    modeBtn.classList.add('active');
+    modeBtn.textContent = mode === 'time' ? '⏱' : '♾';
+    modeBtn.classList.toggle('active', mode === 'time');
+    pauseBtn.textContent = paused ? '▶' : '⏸';
+    pauseBtn.classList.toggle('active', paused);
     updateBonusAvailability();
     resize();
-    markAllAsFalling();
+
+    if (!loaded){
+      markAllAsFalling();
+    }
+
     render();
-    startTimer();
+    if (mode === 'time') startTimer();
+    requestAnimationFrame(fxLoop);
     setInterval(() => {
       updateBonusAvailability();
       if (mode === 'time' && !paused && !boardLocked && !hasMoves()){
@@ -1056,11 +1214,8 @@
         }
       }
     }, 1100);
-    requestAnimationFrame(fxLoop);
+    scheduleSave();
   }
-
-  let hoverTarget = null;
-  let syringeSourcePos = null;
 
   board.addEventListener('pointerdown', (e) => {
     if (boardLocked || paused) return;
@@ -1073,10 +1228,6 @@
     dragStart = cell;
 
     if (activeTool){
-      if (activeTool === 'time'){
-        applyToolAt(cell.r, cell.c);
-        return;
-      }
       applyToolAt(cell.r, cell.c);
       return;
     }
@@ -1153,6 +1304,11 @@
   bombBtn.addEventListener('click', () => buyTool('bomb'));
   timeBtn.addEventListener('click', () => buyTool('time'));
   syringeBtn.addEventListener('click', () => buyTool('syringe'));
+  cookieClose.addEventListener('click', () => {
+    showCookieBanner = false;
+    setCookie(COOKIE_NOTICE_KEY, '1');
+    updateCookieBanner();
+  });
 
   function activateFizzAt(r, c){
     const item = getItem(r, c);
@@ -1175,6 +1331,7 @@
     addScore(300);
     render();
     resolveBoard();
+    scheduleSave();
     return true;
   }
 
@@ -1182,6 +1339,7 @@
     bonusBar.style.justifyContent = 'center';
   }
 
+  window.addEventListener('beforeunload', saveGame);
   init();
   updateBonusBarLayout();
 })();
