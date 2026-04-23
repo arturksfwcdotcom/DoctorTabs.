@@ -185,117 +185,46 @@
       animation-delay:var(--delay, 0ms);
     }
 
-    .capsule{
+    .pill-svg{
       width:86%;
       height:64%;
-      border-radius:999px;
-      position:relative;
-      overflow:hidden;
-      border:1px solid rgba(255,255,255,.16);
-      box-shadow:
-        inset 0 5px 10px rgba(255,255,255,.14),
-        inset 0 -10px 16px rgba(0,0,0,.22),
-        0 8px 14px rgba(0,0,0,.28);
-      transform:translateZ(0);
+      overflow:visible;
+      filter:drop-shadow(0 8px 14px rgba(0,0,0,.28));
     }
 
-    .capsule::before{
-      content:'';
-      position:absolute;
-      left:12%;
-      top:15%;
-      width:28%;
-      height:24%;
-      border-radius:999px;
-      background:rgba(255,255,255,.42);
-      filter:blur(1px);
-      opacity:.72;
-      pointer-events:none;
+    .pill-shape{
+      stroke:rgba(255,255,255,.16);
+      stroke-width:1.2;
+      vector-effect:non-scaling-stroke;
     }
 
-    .capsule::after{
-      content:'';
-      position:absolute;
-      inset:0;
-      border-radius:999px;
-      pointer-events:none;
+    .pill-normal{
+      fill:url(#pillGrad);
     }
 
-    .capsule.normal{
-      background:linear-gradient(180deg, var(--pill-top), var(--pill-bottom));
-    }
-
-    .capsule.normal::after{
-      background:linear-gradient(90deg,
-        rgba(255,255,255,.18), transparent 26%,
-        rgba(255,255,255,.46) 47%,
-        rgba(255,255,255,.78) 50%,
-        rgba(255,255,255,.46) 53%,
-        transparent 74%, rgba(255,255,255,.12));
-      opacity:.92;
-      mix-blend-mode:screen;
-    }
-
-    .capsule.rainbow{
+    .pill-rainbow{
+      fill:url(#rainbowGrad);
       animation:rainbow-shift 1.05s linear infinite;
-      background:linear-gradient(90deg, #ff4d4d, #ffb347, #fff16a, #57ff74, #4fd8ff, #8b62ff, #ff68da);
-      background-size:280% 100%;
     }
 
-    .capsule.rainbow::after{
-      background:linear-gradient(90deg,
-        rgba(255,255,255,.18), transparent 26%,
-        rgba(255,255,255,.52) 47%,
-        rgba(255,255,255,.9) 50%,
-        rgba(255,255,255,.52) 53%,
-        transparent 74%, rgba(255,255,255,.15));
-      opacity:.95;
-      mix-blend-mode:screen;
-    }
+    .pill-black{fill:url(#blackGrad)}
+    .pill-fizz{fill:url(#fizzGrad)}
 
-    .capsule.black{
-      background:linear-gradient(180deg, #313131, #040404);
-    }
-
-    .capsule.fizz{
-      background:linear-gradient(180deg, #f3ffff, #77f8ff);
-      box-shadow:
-        inset 0 5px 10px rgba(255,255,255,.22),
-        inset 0 -10px 16px rgba(0,0,0,.18),
-        0 0 16px rgba(123,245,255,.42),
-        0 8px 14px rgba(0,0,0,.28);
-    }
-
-    .capsule.fizz::after{
-      background:linear-gradient(90deg,
-        rgba(255,255,255,.18), transparent 26%,
-        rgba(255,255,255,.58) 47%,
-        rgba(255,255,255,.92) 50%,
-        rgba(255,255,255,.58) 53%,
-        transparent 74%, rgba(255,255,255,.12));
-      opacity:.95;
-      mix-blend-mode:screen;
+    .pill-highlight{
+      opacity:.85;
+      fill:url(#shineGrad);
     }
 
     .stripe{
-      position:absolute;
-      left:50%;
-      top:9%;
-      width:9%;
-      height:82%;
-      transform:translateX(-50%);
-      border-radius:999px;
-      background:rgba(255,255,255,.66);
-      box-shadow:0 0 8px rgba(255,255,255,.22);
-      pointer-events:none;
+      fill:rgba(255,255,255,.62);
+      filter:drop-shadow(0 0 8px rgba(255,255,255,.22));
     }
 
-    .selected .capsule{filter:drop-shadow(0 0 14px rgba(125,220,255,.78));}
-    .target .capsule{
-      outline:2px dashed rgba(255,255,255,.56);
-      outline-offset:-5px;
+    .selected .pill-svg{filter:drop-shadow(0 0 14px rgba(125,220,255,.78));}
+    .target .pill-svg{
+      filter:drop-shadow(0 0 10px rgba(255,255,255,.55));
     }
-    .source .capsule{filter:drop-shadow(0 0 12px rgba(255,255,255,.62));}
+    .source .pill-svg{filter:drop-shadow(0 0 12px rgba(255,255,255,.62));}
 
     canvas#fx{
       position:absolute;
@@ -384,7 +313,38 @@
 
   <div id="board-wrap">
     <div id="board-shell">
-      <div id="board"></div>
+      <div id="board">
+        <svg width="0" height="0" style="position:absolute">
+          <defs>
+            <linearGradient id="pillGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#ffffff" stop-opacity=".42"/>
+              <stop offset="18%" stop-color="var(--pill-top, #ff5f60)"/>
+              <stop offset="100%" stop-color="var(--pill-bottom, #cc4550)"/>
+            </linearGradient>
+            <linearGradient id="rainbowGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#ff4d4d"/>
+              <stop offset="16%" stop-color="#ffb347"/>
+              <stop offset="33%" stop-color="#fff16a"/>
+              <stop offset="50%" stop-color="#57ff74"/>
+              <stop offset="66%" stop-color="#4fd8ff"/>
+              <stop offset="83%" stop-color="#8b62ff"/>
+              <stop offset="100%" stop-color="#ff68da"/>
+            </linearGradient>
+            <linearGradient id="blackGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#3a3a3a"/>
+              <stop offset="100%" stop-color="#040404"/>
+            </linearGradient>
+            <linearGradient id="fizzGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#ffffff"/>
+              <stop offset="100%" stop-color="#77f8ff"/>
+            </linearGradient>
+            <linearGradient id="shineGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="rgba(255,255,255,.8)"/>
+              <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
       <canvas id="fx"></canvas>
     </div>
   </div>
@@ -419,8 +379,9 @@
   const RAINBOW = 'rainbow';
   const BLACK = 'black';
   const FIZZ = 'fizz';
+  const MODES = ['time', 'moves', 'endless'];
 
-  const COOKIE_KEY = 'match3_pills_progress_v2';
+  const COOKIE_KEY = 'match3_pills_progress_v3';
   const COOKIE_NOTICE_KEY = 'match3_pills_cookie_notice_v1';
 
   const board = document.getElementById('board');
@@ -450,13 +411,13 @@
   let grid = [];
   let score = 0;
   let coins = 0;
-  let moves = 1;
+  let moves = 80;
   let shuffles = 0;
   let mode = 'time';
   let paused = false;
   let timeLeft = 180;
   let timer = null;
-  let activeTool = null; // glove | bomb | syringe
+  let activeTool = null;
   let syringeSourceColor = null;
   let syringeSourcePos = null;
   let selected = null;
@@ -539,9 +500,9 @@
       if (Array.isArray(data.grid)) grid = deserializeGrid(data.grid);
       score = Number(data.score || 0);
       coins = Number(data.coins || 0);
-      moves = Number(data.moves || 1);
+      moves = Number(data.moves || 80);
       shuffles = Number(data.shuffles || 0);
-      mode = data.mode === 'endless' ? 'endless' : 'time';
+      mode = MODES.includes(data.mode) ? data.mode : 'time';
       paused = !!data.paused;
       timeLeft = Number(data.timeLeft || 180);
       scoreMilestone = Number(data.scoreMilestone || 0);
@@ -572,7 +533,6 @@
     if (forceType === RAINBOW) return { type: RAINBOW, color: null, active: true };
     if (forceType === BLACK) return { type: BLACK, color: null, active: false };
     if (forceType === FIZZ) return { type: FIZZ, color: null, active: true };
-
     const p = Math.random();
     if (p < 0.0009) return { type: FIZZ, color: null, active: true };
     if (p < 0.016) return { type: BLACK, color: null, active: false };
@@ -623,7 +583,6 @@
     }
     let k = 0;
     for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) grid[r][c] = items[k++];
-
     let guard = 0;
     while (collectMatches().length && guard++ < 6){
       for (let i = items.length - 1; i > 0; i--){
@@ -639,11 +598,7 @@
 
   function markAllAsFalling(){
     fallMap.clear();
-    for (let r = 0; r < ROWS; r++){
-      for (let c = 0; c < COLS; c++){
-        fallMap.set(`${r},${c}`, r);
-      }
-    }
+    for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) fallMap.set(`${r},${c}`, r);
     setTimeout(() => fallMap.clear(), 900);
   }
 
@@ -658,6 +613,30 @@
     return { r, c };
   }
 
+  function pillSvgMarkup(item, key){
+    const w = 100;
+    const h = 72;
+    const rx = 36;
+    const x = 8;
+    const y = 8;
+    const fillClass = item.type === 'color' ? 'pill-normal' : item.type === RAINBOW ? 'pill-rainbow' : item.type === BLACK ? 'pill-black' : 'pill-fizz';
+    const highlight = item.type === BLACK ? '' : '<ellipse class="pill-highlight" cx="28" cy="20" rx="18" ry="10" />';
+    const stripeColor = item.type === BLACK ? 'rgba(255,255,255,.28)' : 'rgba(255,255,255,.68)';
+    return `
+      <svg class="pill-svg" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true">
+        <defs>
+          <linearGradient id="g-${key}" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="${item.type === 'color' ? item.color : '#ffffff'}" stop-opacity=".48" />
+            <stop offset="100%" stop-color="${item.type === 'color' ? shadeColor(item.color, -22) : '#000000'}" stop-opacity="1" />
+          </linearGradient>
+        </defs>
+        <rect x="${x}" y="${y}" width="${w - 16}" height="${h - 16}" rx="${rx}" class="pill-shape ${fillClass}" fill="url(#g-${key})" />
+        ${highlight}
+        <rect x="47" y="14" width="6" height="44" rx="3" class="stripe" fill="${stripeColor}" />
+      </svg>
+    `;
+  }
+
   function render(){
     board.innerHTML = '';
     const gridLines = document.createElement('div');
@@ -668,59 +647,29 @@
       for (let c = 0; c < COLS; c++){
         const item = grid[r][c];
         if (!item) continue;
-
         const cell = document.createElement('div');
         cell.className = 'cell';
-        const key = `${r},${c}`;
-        if (fallMap.has(key)){
+        const key = `${r}-${c}-${Math.random().toString(36).slice(2,7)}`;
+        if (fallMap.has(`${r},${c}`)){
           cell.classList.add('fall-in');
-          cell.style.setProperty('--delay', `${Math.min(fallMap.get(key) * 80, 560)}ms`);
+          cell.style.setProperty('--delay', `${Math.min(fallMap.get(`${r},${c}`) * 80, 560)}ms`);
         }
         if (selected && selected.r === r && selected.c === c) cell.classList.add('selected');
-        if (syringeSourceColor && syringeSourcePos && syringeSourcePos.r === r && syringeSourcePos.c === c) cell.classList.add('source');
+        if (syringeSourcePos && syringeSourcePos.r === r && syringeSourcePos.c === c) cell.classList.add('source');
         if (hoverTarget && hoverTarget.r === r && hoverTarget.c === c) cell.classList.add('target');
-
         cell.style.left = (c * cellSize + cellSize / 2) + 'px';
         cell.style.top = (r * cellSize + cellSize / 2) + 'px';
         cell.style.width = cellSize + 'px';
         cell.style.height = cellSize + 'px';
-
-        const capsule = document.createElement('div');
-        capsule.className = 'capsule';
-        if (item.type === 'color'){
-          capsule.classList.add('normal');
-          capsule.style.setProperty('--pill-top', item.color);
-          capsule.style.setProperty('--pill-bottom', shadeColor(item.color, -20));
-        } else if (item.type === RAINBOW){
-          capsule.classList.add('rainbow');
-        } else if (item.type === BLACK){
-          capsule.classList.add('black');
-        } else if (item.type === FIZZ){
-          capsule.classList.add('fizz');
-        }
-
-        const stripe = document.createElement('div');
-        stripe.className = 'stripe';
-        capsule.appendChild(stripe);
-
-        if (item.type === BLACK && item.active){
-          const glow = document.createElement('div');
-          glow.className = 'stripe';
-          glow.style.width = '15%';
-          glow.style.opacity = '.88';
-          glow.style.background = 'rgba(255,255,255,.38)';
-          capsule.appendChild(glow);
-        }
-
-        cell.appendChild(capsule);
+        cell.innerHTML = pillSvgMarkup(item, key);
         board.appendChild(cell);
       }
     }
-
     updateCookieBanner();
   }
 
   function shadeColor(hex, amount){
+    if (!hex || typeof hex !== 'string' || !hex.startsWith('#')) return '#000000';
     const raw = hex.replace('#', '');
     const num = parseInt(raw, 16);
     const r = Math.max(0, Math.min(255, (num >> 16) + amount));
@@ -762,19 +711,26 @@
     requestAnimationFrame(fxLoop);
   }
 
+  function scoreFactor(){
+    if (mode === 'moves') return 0.4;
+    return 1;
+  }
+
   function addScore(points){
-    score += points;
+    const gained = Math.max(1, Math.round(points * scoreFactor()));
+    score += gained;
     scoreEl.textContent = score;
 
-    if (mode !== 'time') return;
-    const milestone = Math.floor(score / 1500);
-    while (milestone > scoreMilestone){
-      scoreMilestone += 1;
-      shuffles += 1;
-      coins += 10;
-      shufflesEl.textContent = shuffles;
-      coinsEl.textContent = coins;
-      toastMsg('➕🔀➕🪙');
+    if (mode === 'time'){
+      const milestone = Math.floor(score / 1500);
+      while (milestone > scoreMilestone){
+        scoreMilestone += 1;
+        shuffles += 1;
+        coins += 10;
+        shufflesEl.textContent = shuffles;
+        coinsEl.textContent = coins;
+        toastMsg('➕🔀➕🪙');
+      }
     }
     scheduleSave();
   }
@@ -804,7 +760,6 @@
 
   function collectMatches(){
     const groups = [];
-
     for (let r = 0; r < ROWS; r++){
       let c = 0;
       while (c < COLS){
@@ -815,10 +770,9 @@
         const color = base.type === 'color' ? base.color : null;
         c++;
         while (c < COLS && grid[r][c] && (matchesColor(grid[r][c], color) || grid[r][c].type === BLACK)) c++;
-        if (c - start >= 3) groups.push({ axis: 'row', items: Array.from({ length: c - start }, (_, i) => ({ r, c: start + i, item: grid[r][start + i] })) });
+        if (c - start >= 3) groups.push({ items: Array.from({ length: c - start }, (_, i) => ({ r, c: start + i, item: grid[r][start + i] })) });
       }
     }
-
     for (let c = 0; c < COLS; c++){
       let r = 0;
       while (r < ROWS){
@@ -829,10 +783,9 @@
         const color = base.type === 'color' ? base.color : null;
         r++;
         while (r < ROWS && grid[r][c] && (matchesColor(grid[r][c], color) || grid[r][c].type === BLACK)) r++;
-        if (r - start >= 3) groups.push({ axis: 'col', items: Array.from({ length: r - start }, (_, i) => ({ r: start + i, c, item: grid[start + i][c] })) });
+        if (r - start >= 3) groups.push({ items: Array.from({ length: r - start }, (_, i) => ({ r: start + i, c, item: grid[start + i][c] })) });
       }
     }
-
     return groups;
   }
 
@@ -840,13 +793,11 @@
     if (boardLocked) return;
     boardLocked = true;
     let didSomething = false;
-
     while (true){
       const groups = collectMatches();
       if (!groups.length) break;
       didSomething = true;
       const keep = new Set();
-
       for (const group of groups){
         const hasBlack = group.items.some(x => x.item && x.item.type === BLACK);
         if (hasBlack){
@@ -862,7 +813,6 @@
           }
         }
       }
-
       let cleared = 0;
       for (const group of groups){
         for (const x of group.items){
@@ -876,11 +826,9 @@
           cleared += 1;
         }
       }
-
       refill();
       addScore(100 * cleared);
     }
-
     if (didSomething){
       render();
       ensurePlayable();
@@ -907,11 +855,10 @@
   }
 
   function shuffleBoard(){
-    if (mode !== 'time') return toastMsg('⛔');
+    if (mode === 'endless') return toastMsg('⛔');
     if (shuffles <= 0 || boardLocked) return toastMsg('⛔');
     shuffles -= 1;
     shufflesEl.textContent = shuffles;
-
     const items = [];
     for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) items.push(grid[r][c]);
     for (let i = items.length - 1; i > 0; i--){
@@ -920,7 +867,6 @@
     }
     let k = 0;
     for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) grid[r][c] = items[k++];
-
     resolveBoard();
     if (!hasMoves()) shuffleBoard();
     render();
@@ -928,13 +874,14 @@
   }
 
   function spendMove(){
-    if (moves <= 0){
-      moves = 1;
-      toastMsg('👣+1');
-    } else {
+    if (mode === 'moves'){
       moves -= 1;
+      if (moves < 0) moves = 0;
+      movesEl.textContent = moves;
+      if (moves === 0){
+        toastMsg('⛔');
+      }
     }
-    movesEl.textContent = moves;
     scheduleSave();
   }
 
@@ -943,11 +890,8 @@
     if (!item || item.type !== FIZZ) return false;
     const horizontal = Math.random() < 0.5;
     const list = [];
-    if (horizontal){
-      for (let x = 0; x < COLS; x++) list.push({ r, c: x });
-    } else {
-      for (let y = 0; y < ROWS; y++) list.push({ r: y, c });
-    }
+    if (horizontal){ for (let x = 0; x < COLS; x++) list.push({ r, c: x }); }
+    else { for (let y = 0; y < ROWS; y++) list.push({ r: y, c }); }
     for (const p of list){
       if (grid[p.r][p.c]){
         const center = cellCenter(p.r, p.c);
@@ -985,7 +929,7 @@
   }
 
   function buyTool(tool){
-    if (mode !== 'time') return toastMsg('⛔');
+    if (mode === 'endless') return toastMsg('⛔');
     if (tool === 'time'){
       if (coins < 45) return toastMsg('⛔');
       coins -= 45;
@@ -996,19 +940,18 @@
       scheduleSave();
       return;
     }
-
-    const cost = tool === 'glove' ? 15 : 35;
+    const cost = tool === 'glove' ? 15 : tool === 'bomb' ? 35 : 40;
     if (coins < cost) return toastMsg('⛔');
     coins -= cost;
     coinsEl.textContent = coins;
     activateToolState(tool);
-    toastMsg(tool === 'glove' ? '🧤' : '💣');
+    toastMsg(tool === 'glove' ? '🧤' : tool === 'bomb' ? '💣' : '💉');
     scheduleSave();
   }
 
   function applyToolAt(r, c){
     if (!activeTool) return false;
-    if (mode !== 'time') return false;
+    if (mode === 'endless') return false;
     const item = getItem(r, c);
     if (!item) return false;
 
@@ -1033,7 +976,6 @@
         { r: r + 1, c },
         { r: r + 1, c: c + 1 }
       ].filter(p => p.r < ROWS && p.c < COLS);
-
       for (const p of area){
         if (grid[p.r][p.c]){
           const center = cellCenter(p.r, p.c);
@@ -1068,12 +1010,12 @@
       resolveBoard();
       return true;
     }
-
     return false;
   }
 
   function trySwap(a, b){
     if (!a || !b || !adjacent(a, b) || boardLocked || paused) return false;
+    if (mode === 'moves' && moves <= 0) return false;
     swap(a, b);
     render();
     const found = collectMatches().length > 0;
@@ -1081,6 +1023,7 @@
       spendMove();
       resolveBoard();
       ensurePlayable();
+      scheduleSave();
       return true;
     }
     swap(a, b);
@@ -1090,16 +1033,32 @@
   }
 
   function ensurePlayable(){
-    if (mode !== 'time') return;
+    if (mode === 'endless') return;
     let guard = 0;
     while (!hasMoves() && guard++ < 8){
       if (shuffles > 0) shuffleBoard();
       else {
-        if (moves <= 0) moves = 1;
+        if (mode === 'moves' && moves <= 0) break;
+        if (moves <= 0) moves = mode === 'moves' ? 80 : 1;
         movesEl.textContent = moves;
         break;
       }
     }
+  }
+
+  function finishTimeMode(){
+    mode = 'endless';
+    paused = false;
+    modeBtn.textContent = '♾';
+    modeBtn.classList.remove('active');
+    pauseBtn.textContent = '⏸';
+    pauseBtn.classList.remove('active');
+    timeBox.style.display = 'none';
+    coins = coins;
+    updateBonusAvailability();
+    render();
+    toastMsg('♾');
+    scheduleSave();
   }
 
   function startTimer(){
@@ -1110,13 +1069,20 @@
         timeLeft -= 1;
         timeLeftEl.textContent = timeLeft;
         scheduleSave();
+      } else {
+        finishTimeMode();
       }
     }, 1000);
   }
 
   function updateCookieBanner(){
-    if (showCookieBanner) cookieNotice.style.display = 'flex';
-    else cookieNotice.style.display = 'none';
+    cookieNotice.style.display = showCookieBanner ? 'flex' : 'none';
+  }
+
+  function cycleMode(){
+    const idx = MODES.indexOf(mode);
+    const next = MODES[(idx + 1) % MODES.length];
+    setMode(next);
   }
 
   function setMode(next){
@@ -1125,33 +1091,37 @@
     if (mode === 'endless' && next === 'time'){
       storedEndlessGrid = cloneGrid(grid);
     }
-
     if (mode === 'time' && next === 'endless' && storedEndlessGrid){
       grid = cloneGrid(storedEndlessGrid);
     }
 
     mode = next;
     modeBtn.classList.toggle('active', mode === 'time');
-    modeBtn.textContent = mode === 'time' ? '⏱' : '♾';
+    modeBtn.textContent = mode === 'time' ? '⏱' : mode === 'moves' ? '👣' : '♾';
     timeBox.style.display = mode === 'time' ? '' : 'none';
 
     if (mode === 'time'){
       timeLeft = 180;
       timeLeftEl.textContent = timeLeft;
-      paused = false;
-      pauseBtn.textContent = '⏸';
-      pauseBtn.classList.remove('active');
       randomizeBoardPreserveState();
-      updateBonusAvailability();
-      startTimer();
-    } else {
-      paused = false;
-      pauseBtn.textContent = '⏸';
-      pauseBtn.classList.remove('active');
-      updateBonusAvailability();
-      render();
+    } else if (mode === 'moves'){
+      moves = 80;
+      movesEl.textContent = moves;
+      if (!grid.length) buildGrid();
+      if (!hasAnyCells()) buildGrid();
     }
+
+    paused = false;
+    pauseBtn.textContent = '⏸';
+    pauseBtn.classList.remove('active');
+    updateBonusAvailability();
+    if (mode === 'time' && !timer) startTimer();
+    if (mode !== 'time') render();
     scheduleSave();
+  }
+
+  function hasAnyCells(){
+    return grid.some(row => row.some(Boolean));
   }
 
   function togglePause(){
@@ -1162,7 +1132,7 @@
   }
 
   function updateBonusAvailability(){
-    const enabled = mode === 'time' && !paused;
+    const enabled = mode !== 'endless' && !paused;
     gloveBtn.disabled = !enabled;
     bombBtn.disabled = !enabled;
     timeBtn.disabled = !enabled;
@@ -1176,7 +1146,7 @@
       buildGrid();
       score = 0;
       coins = 0;
-      moves = 1;
+      moves = 80;
       shuffles = 0;
       mode = 'time';
       paused = false;
@@ -1190,17 +1160,14 @@
     movesEl.textContent = moves;
     shufflesEl.textContent = shuffles;
     timeLeftEl.textContent = timeLeft;
-    modeBtn.textContent = mode === 'time' ? '⏱' : '♾';
+    modeBtn.textContent = mode === 'time' ? '⏱' : mode === 'moves' ? '👣' : '♾';
     modeBtn.classList.toggle('active', mode === 'time');
     pauseBtn.textContent = paused ? '▶' : '⏸';
     pauseBtn.classList.toggle('active', paused);
     updateBonusAvailability();
     resize();
 
-    if (!loaded){
-      markAllAsFalling();
-    }
-
+    if (!loaded) markAllAsFalling();
     render();
     if (mode === 'time') startTimer();
     requestAnimationFrame(fxLoop);
@@ -1208,10 +1175,7 @@
       updateBonusAvailability();
       if (mode === 'time' && !paused && !boardLocked && !hasMoves()){
         if (shuffles > 0) shuffleBoard();
-        else if (moves <= 0){
-          moves = 1;
-          movesEl.textContent = moves;
-        }
+        else if (moves <= 0) moves = 1;
       }
     }, 1100);
     scheduleSave();
@@ -1263,31 +1227,25 @@
     const y = e.clientY - rect.top;
     const cell = cellFromPoint(x, y);
     pointerDown = false;
-
     if (!cell){
       selected = null;
       render();
       return;
     }
-
     if (paused) return;
-
     if (activeTool){
       applyToolAt(cell.r, cell.c);
       return;
     }
-
     const item = getItem(cell.r, cell.c);
     if (item && item.type === FIZZ){
       activateFizzAt(cell.r, cell.c);
       return;
     }
-
     if (selected && selected.r === cell.r && selected.c === cell.c){
       render();
       return;
     }
-
     if (selected && adjacent(selected, cell)){
       trySwap(selected, cell);
       selected = null;
@@ -1297,9 +1255,9 @@
     render();
   });
 
-  modeBtn.addEventListener('click', () => setMode(mode === 'time' ? 'endless' : 'time'));
-  pauseBtn.addEventListener('click', () => togglePause());
-  shuffleBtn.addEventListener('click', () => shuffleBoard());
+  modeBtn.addEventListener('click', cycleMode);
+  pauseBtn.addEventListener('click', togglePause);
+  shuffleBtn.addEventListener('click', shuffleBoard);
   gloveBtn.addEventListener('click', () => buyTool('glove'));
   bombBtn.addEventListener('click', () => buyTool('bomb'));
   timeBtn.addEventListener('click', () => buyTool('time'));
@@ -1315,11 +1273,8 @@
     if (!item || item.type !== FIZZ) return false;
     const horizontal = Math.random() < 0.5;
     const list = [];
-    if (horizontal){
-      for (let x = 0; x < COLS; x++) list.push({ r, c: x });
-    } else {
-      for (let y = 0; y < ROWS; y++) list.push({ r: y, c });
-    }
+    if (horizontal){ for (let x = 0; x < COLS; x++) list.push({ r, c: x }); }
+    else { for (let y = 0; y < ROWS; y++) list.push({ r: y, c }); }
     for (const p of list){
       if (grid[p.r][p.c]){
         const center = cellCenter(p.r, p.c);
